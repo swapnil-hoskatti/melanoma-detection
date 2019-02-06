@@ -8,6 +8,10 @@ from flask import render_template as render
 from flask import request, url_for
 from werkzeug.utils import secure_filename
 
+# imports - module imports
+from core.melancholic import main_app as melancholic
+
+
 # setting up constants
 UPLOAD_FOLDER = '../temp_files/'
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'jp2', 'jpe', 'sr', 'ras',
@@ -46,10 +50,13 @@ def upload_file():
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            current_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(current_file_path)
+            
             # send to base-app here
-            prediction = 'true'
+            prediction = melancholic(current_file_path)
+
+            # prediction = 'true'
 
             return render('page.html', result=prediction, upload='true')
     
