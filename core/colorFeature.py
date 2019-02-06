@@ -3,6 +3,9 @@
 #       colour covariance           #
 #####################################
 
+# imports - final imports
+from . import np
+
 
 def covariance(mask, img):
     b, g, r, m, count, icount = [], [], [], [], 0, 0

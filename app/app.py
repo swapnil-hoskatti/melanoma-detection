@@ -50,14 +50,16 @@ def upload_file():
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            current_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(current_file_path)
+            current_file_path = os.path.join(
+                app.config['UPLOAD_FOLDER'], filename)
             
+            file.save(current_file_path)
+
             # send to base-app here
             prediction = melancholic(current_file_path)
 
             # prediction = 'true'
 
             return render('page.html', result=prediction, upload='true')
-    
+
     return render('page.html', upload='false')

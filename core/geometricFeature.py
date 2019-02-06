@@ -3,6 +3,9 @@
 # irregularity, circularity, radius #
 #####################################
 
+# imports - final imports
+from . import feature, np
+
 
 def GeometricFeatures(m):
     edges1 = feature.canny(m, sigma=0)

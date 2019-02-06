@@ -3,13 +3,16 @@
 #       Bins: algorithm             #
 #####################################
 
+# imports - final imports
+from . import median, np, stats, cv2
+
 # global constants
 ROUND_FACTOR = 4
 
 
 def __histogram(img):
     b_, g_, r_ = cv2.split(img)
-    
+
     H_b, H_g, H_r = {}, {}, {}
 
     for pixel in b_.flatten():
@@ -30,9 +33,7 @@ def __histogram(img):
         else:
             H_r[pixel] += 1
 
-    
     return H_b, H_g, H_r
-
 
 
 def __centerGravity(H_b, H_g, H_r):
@@ -41,14 +42,14 @@ def __centerGravity(H_b, H_g, H_r):
 
 def texture(img, mask):
     bins = {}
-    
+
     H_b, H_g, H_r = __histogram(img)
     b_median, g_median, r_median = __centerGravity(H_b, H_g, H_r)
-    
+
     for y, rows in enumerate(img):
         for x, pixel in enumerate(rows):
             for index, value in enumerate(pixel):
-                 if any(mask[y][x] == [0,0,0]):
+                if any(mask[y][x] == [0, 0, 0]):
                     if index == 0:
                         # 0 corresponds to B plane in openCV split
                         if value > b_median:
@@ -75,22 +76,26 @@ def texture(img, mask):
             if bin_val not in bins.keys():
                 bins[bin_val] = [img[y][x]]
             else:
-                bins[bin_val] += [img[y][x]]        
-    
+                bins[bin_val] += [img[y][x]]
+
     return bins
 
 
 def mean(*args):
     return tuple(np.mean(x) for x in args)
 
+
 def mode(*args):
     return tuple(stats.mode(x) for x in args)
-    
+
+
 def std_dev(*args):
     return tuple(np.std(x) for x in args)
 
+
 def skewness(mean, mode, std_dev):
     return (mean - mode) / std_dev
+
 
 def kurlosis():
     return
@@ -99,8 +104,8 @@ def kurlosis():
 def features(bins):
     """
     input bins dict which contains name of bin and posistion of pixel : (x,y)
-    """   
-    
+    """
+
     for bin_name, pixels in bins.items():
 
         Bmean = round(mean([x[0] for x in pixels])[0], ROUND_FACTOR)
@@ -111,12 +116,12 @@ def features(bins):
         Bmode = (mode([x[0] for x in pixels])[0])[0]
         Gmode = (mode([x[1] for x in pixels])[0])[0]
         Rmode = (mode([x[2] for x in pixels])[0])[0]
-        
+
         Bstd = round(std_dev([x[0] for x in pixels])[0], ROUND_FACTOR)
         Gstd = round(std_dev([x[1] for x in pixels])[0], ROUND_FACTOR)
         Rstd = round(std_dev([x[2] for x in pixels])[0], ROUND_FACTOR)
-        
-        Bsk = round(skewness(Bmean, Bmode, Bstd)[0], ROUND_FACTOR) 
+
+        Bsk = round(skewness(Bmean, Bmode, Bstd)[0], ROUND_FACTOR)
         Gsk = round(skewness(Gmean, Gmode, Gstd)[0], ROUND_FACTOR)
         Rsk = round(skewness(Rmean, Rmode, Rstd)[0], ROUND_FACTOR)
 

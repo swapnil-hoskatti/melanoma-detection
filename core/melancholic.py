@@ -4,20 +4,19 @@
 #################################################################################
 
 # imports - imports for segmentation
-from segmentation import otsuThreshold
+from core.segmentation import otsuThreshold
 
 # imports - imports for feature extraction
-from colorFeature import ColorFeatures
-from textureFeature import TextureFeatures
-from geometricFeature import GeometricFeatures
+from core.colorFeature import ColorFeatures
+from core.textureFeature import TextureFeatures
+from core.geometricFeature import GeometricFeatures
 
-# imports - imports for classification
-import keras
+# imports - final imports
+from . import os, cv2, keras
 
-
-# global constants
-CLASSIFICATION_MODEL_ARCH_PATH = './models/classifier.json'
-CLASSIFICATION_MODEL_WEIGHTS_PATH = './models/classifier.hdf5'
+# constants - global constants for classification
+CLASSIFICATION_MODEL_ARCH_PATH = './core/models/classifier.json'
+CLASSIFICATION_MODEL_WEIGHTS_PATH = './core/models/classifier.hdf5'
 
 
 # image acquisition
@@ -27,11 +26,13 @@ def rsize(img):
         img = cv2.resize(img, dsize=(600, 450),
                          interpolation=cv2.INTER_CUBIC)
         return img
+    return img
+
 
 def read(path):
     if os.path.isfile(path):
         img = cv2.imread(path)
-        if img:
+        if img.any():
             return rsize(img)
         else:
             return 'Oops!'
@@ -42,6 +43,7 @@ def read(path):
 def procedure(img):
     # segmentation
     mask, img = otsuThreshold(img)
+    print('Stage 1: Segmentation Done')
 
     # feature extraction
     crc, ira, irb, irc, ird, avgRadius, c = GeometricFeatures(mask)
@@ -49,6 +51,7 @@ def procedure(img):
         mask, img, avgRadius, c)
     Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk = TextureFeatures(
         mask, img)
+    print('Stage 2: Feature Extraction Done')
 
     # classification
     with open(CLASSIFICATION_MODEL_ARCH_PATH) as json_file:
@@ -56,11 +59,13 @@ def procedure(img):
     model.load_weights(CLASSIFICATION_MODEL_WEIGHTS_PATH)
     model.compile(loss='binary_crossentropy',
                   optimizer='rmsprop', metrics=['accuracy'])
-    score = model.evaluate(X, Y, verbose=0)
+    score = model.predict([img])[0]
+    print(f'Stage 3: Prediction Done ~ {score}')
 
     return score
 
 
 def main_app(path):
     img = read(path)
+    print('Stage 0: Acquisition Done')
     return procedure(img)
