@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>{% block title %} {{ title }} - Inventory Management {% endblock %}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+        <link rel="icon" href="{{ url_for('static', filename='site_icon.png') }}" class="js-favicon">
+        <!--div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div-->
+        <script src="{{ url_for('static', filename='jquery-3.3.1.slim.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+        <style>
+            .container { padding-top: 70px; }
+        </style>
+    </head>
+
+    <nav class="navbar navbar-dark bg-dark">
+        <button id="reload-button" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            This Button Reloads the page
+        </button>
+    </nav>
+
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+            {% if upload == 'false' %}
+            <h1 class="display-4">Upload new File</h1>
+                <form method=post enctype=multipart/form-data>
+                    <input type=file name=file>
+                    <input type=submit value=Upload>
+                </form>
+            {% else %}
+                {% if result == 'true' %}
+                    <h1 class="display-4">TRUE</h1>
+                {% else %}
+                    <h1 class="display-4">FALSE</h1>
+                {% endif %}
+            {% endif%}
+        </div>
+    </div>
+
+    <script>
+        let reload = document.getElementById('reload-button');
+        {% if upload == 'true' %}
+            reload.onclick = function(){
+                window.location = "http://localhost:5000/";
+            }
+        {% else %}
+            reload.onclick = function refreshPage(){
+                window.location.reload();
+            } 
+        {% endif %}
+    </script>
+</html>

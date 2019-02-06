@@ -1,0 +1,7 @@
+__name__ = "melanoma detection"
+__version__ = "0.0"
+__url__ = "https://github.com/gavindsouza/melanoma-detection"
+__author__ = "Gavin D'souza"
+__email__ = "gavin18d@gmail.com"
+__description__ = "Baadme fill karunga, shayad lol"
+__license__ = ""
