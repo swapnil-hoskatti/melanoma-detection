@@ -48,7 +48,7 @@ def texture(img, mask):
 
     for y, rows in enumerate(img):
         for x, pixel in enumerate(rows):
-            if any(mask[y][x] == [0, 0, 0]):
+            if any(mask[y][x] != [0, 0, 0]):
                 for index, value in enumerate(pixel):
                     if index == 0:
                         # 0 corresponds to B plane in openCV split

@@ -4,7 +4,7 @@
 #################################################################################
 
 # imports - imports for segmentation
-from core.segmentation import otsuThreshold
+from core.segmentation import otsuThreshold, unetSegment
 
 # imports - imports for feature extraction
 from core.colorFeature import ColorFeatures
@@ -12,7 +12,7 @@ from core.textureFeature import TextureFeatures
 from core.geometricFeature import GeometricFeatures
 
 # imports - final imports
-from . import os, cv2, keras
+from . import os, cv2, io, keras, np, morphology
 
 # constants - global constants for classification
 CLASSIFICATION_MODEL_ARCH_PATH = './core/models/classifier.json'
@@ -42,6 +42,9 @@ def read(path):
 
 def procedure(img):
     # segmentation
+    unet_1 = cv2.cvtColor(unetSegment(img), cv2.COLOR_GRAY2BGR)
+    io.imsave('../temp_files/unetSegmentOG.jpg', unet_1)
+    
     mask, img = otsuThreshold(img)
     print('Stage 1: Segmentation Done')
 

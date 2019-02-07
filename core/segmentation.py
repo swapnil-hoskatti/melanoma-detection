@@ -6,12 +6,18 @@
 # imports - final imports
 from . import cv2, morphology, np, threshold_otsu, keras
 
-def unetSegment(img):
-    CLASSIFICATION_MODEL_ARCH_PATH = '../core/models/unet-segment.json'
-    CLASSIFICATION_MODEL_WEIGHTS_PATH = '../core/models/unet-segment.hdf5'
+FIRST_LOAD = 0
 
-    with open(CLASSIFICATION_MODEL_ARCH_PATH) as json_file:
-        model = keras.models.model_from_json(json_file)
+def unetSegment(img):
+    img = np.expand_dims(img, axis=0)
+    CLASSIFICATION_MODEL_ARCH_PATH = '../core/models/unet-segment.json'
+    CLASSIFICATION_MODEL_WEIGHTS_PATH = '../core/models/unet-segment.h5'
+
+    json_file = open(CLASSIFICATION_MODEL_ARCH_PATH, 'r')
+    loaded_model_json = json_file.read()
+    json_file.close()
+    model = keras.models.model_from_json(loaded_model_json)
+
     model.load_weights(CLASSIFICATION_MODEL_WEIGHTS_PATH)
     model.compile(loss='binary_crossentropy',
                   optimizer='rmsprop', metrics=['accuracy'])

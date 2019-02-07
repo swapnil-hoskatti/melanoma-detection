@@ -39,7 +39,7 @@ $ cd app
 run the app by typing the following command in your terminal
 
 ``` sourceCode console
-$ python -m flask run
+$ python -m flask run --without-threads
 ```
 
 The application can be accessed at _localhost:5000_ in your browser
