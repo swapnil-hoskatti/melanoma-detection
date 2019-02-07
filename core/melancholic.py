@@ -47,7 +47,7 @@ def procedure(img):
 
     # feature extraction
     crc, ira, irb, irc, ird, avgRadius, c = GeometricFeatures(mask)
-    c_bb, c_bg, c_br, c_gg, c_br, c_gr, c_rr, adhocb1, adhocg1, adhocr1, adhocb2, adhocg2, adhocr2 = ColorFeatures(
+    c_bb, c_bg, c_br, c_gg, c_gr, c_rr, adhocb1, adhocg1, adhocr1, adhocb2, adhocg2, adhocr2 = ColorFeatures(
         mask, img, avgRadius, c)
     Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk = TextureFeatures(
         mask, img)
