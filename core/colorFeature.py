@@ -17,7 +17,7 @@ def covariance(mask, img):
                 g.append(img[i][j][1])
                 r.append(img[i][j][2])
     bg, br, gr = np.cov(b, g), np.cov(b, r), np.cov(g, r)
-    return bg[0][0], bg[0][1], br[0][1], bg[1][1], br[0][1], gr[0][1], gr[1][1]
+    return bg[0][0], bg[0][1], br[0][1], bg[1][1], gr[0][1], gr[1][1]
 
 
 def adhoc(m, image, avgradius, ratio, c):
@@ -60,8 +60,8 @@ def adhoc(m, image, avgradius, ratio, c):
 
 
 def ColorFeatures(mask, image, avgRadius, c):
-    c_bb, c_bg, c_br, c_gg, c_br, c_gr, c_rr = covariance(mask, image)
+    c_bb, c_bg, c_br, c_gg, c_gr, c_rr = covariance(mask, image)
     adhocb1, adhocg1, adhocr1 = adhoc(mask, image, avgRadius, 1/3, c)
     adhocb2, adhocg2, adhocr2 = adhoc(mask, image, avgRadius, 9/10, c)
 
-    return c_bb, c_bg, c_br, c_gg, c_br, c_gr, c_rr, adhocb1, adhocg1, adhocr1, adhocb2, adhocg2, adhocr2
+    return c_bb, c_bg, c_br, c_gg, c_gr, c_rr, adhocb1, adhocg1, adhocr1, adhocb2, adhocg2, adhocr2
