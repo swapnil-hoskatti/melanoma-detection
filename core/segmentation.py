@@ -4,8 +4,19 @@
 #####################################
 
 # imports - final imports
-from . import cv2, morphology, np, threshold_otsu
+from . import cv2, morphology, np, threshold_otsu, keras
 
+def unetSegment(img):
+    CLASSIFICATION_MODEL_ARCH_PATH = '../core/models/unet-segment.json'
+    CLASSIFICATION_MODEL_WEIGHTS_PATH = '../core/models/unet-segment.hdf5'
+
+    with open(CLASSIFICATION_MODEL_ARCH_PATH) as json_file:
+        model = keras.models.model_from_json(json_file)
+    model.load_weights(CLASSIFICATION_MODEL_WEIGHTS_PATH)
+    model.compile(loss='binary_crossentropy',
+                  optimizer='rmsprop', metrics=['accuracy'])
+    
+    return model.predict([img])[0]
 
 def otsuThreshold(img):
     img = img.astype(np.uint8)
@@ -28,4 +39,5 @@ def otsuThreshold(img):
                 img_bgr[i][j][2] = 0
 
     img_bgr = cv2.cvtColor(img_bgr, cv2.COLOR_RGB2BGR)
+    
     return mask, img_bgr.astype(np.uint64)

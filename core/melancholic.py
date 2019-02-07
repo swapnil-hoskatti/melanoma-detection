@@ -23,9 +23,9 @@ CLASSIFICATION_MODEL_WEIGHTS_PATH = './core/models/classifier.hdf5'
 def rsize(img):
     if img.shape != (450, 600, 3):
         # REF: https://stackoverflow.com/a/48121983/10309266
-        img = cv2.resize(img, dsize=(600, 450),
+        return cv2.resize(img, dsize=(600, 450),
                          interpolation=cv2.INTER_CUBIC)
-        return img
+        
     return img
 
 
