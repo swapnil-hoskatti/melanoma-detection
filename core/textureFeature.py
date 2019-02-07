@@ -48,8 +48,8 @@ def texture(img, mask):
 
     for y, rows in enumerate(img):
         for x, pixel in enumerate(rows):
-            for index, value in enumerate(pixel):
-                if any(mask[y][x] == [0, 0, 0]):
+            if any(mask[y][x] == [0, 0, 0]):
+                for index, value in enumerate(pixel):
                     if index == 0:
                         # 0 corresponds to B plane in openCV split
                         if value > b_median:
@@ -71,12 +71,12 @@ def texture(img, mask):
                         else:
                             t_r = 0
 
-            bin_val = f"{t_b} {t_g} {t_r}"
+                bin_val = f"{t_b} {t_g} {t_r}"
 
-            if bin_val not in bins.keys():
-                bins[bin_val] = [img[y][x]]
-            else:
-                bins[bin_val] += [img[y][x]]
+                if bin_val not in bins.keys():
+                    bins[bin_val] = [img[y][x]]
+                else:
+                    bins[bin_val] += [img[y][x]]
 
     return bins
 
