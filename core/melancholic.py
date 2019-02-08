@@ -53,7 +53,7 @@ def procedure(img):
                 temp[i][j] = [255, 255, 255]
     temp = np.array(temp, dtype=np.uint8)
 
-    io.imsave('../temp_files/otsuSegmentOG.jpg', temp)
+    io.imsave('..//otsuSegmentOG.jpg', temp)
     print('Stage 1: Segmentation Done')
 
     # feature extraction
