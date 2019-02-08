@@ -15,8 +15,8 @@ from core.geometricFeature import GeometricFeatures
 from . import os, cv2, io, keras, np, morphology
 
 # constants - global constants for classification
-CLASSIFICATION_MODEL_ARCH_PATH = './core/models/classifier.json'
-CLASSIFICATION_MODEL_WEIGHTS_PATH = './core/models/classifier.hdf5'
+CLASSIFICATION_MODEL_ARCH_PATH = '../core/models/deep-classify.json'
+CLASSIFICATION_MODEL_WEIGHTS_PATH = '../core/models/deep-classify.h5'
 
 
 # image acquisition
@@ -46,6 +46,14 @@ def procedure(img):
     io.imsave('../temp_files/unetSegmentOG.jpg', unet_1)
     
     mask, img = otsuThreshold(img)
+    temp = [[[0,0,0] for x in range(0,600)] for y in range(0,450)]
+    for i, n in enumerate(mask):
+        for j, m in enumerate(n):
+            if m:
+                temp[i][j] = [255, 255, 255]
+    temp = np.array(temp, dtype=np.uint8)
+
+    io.imsave('../temp_files/otsuSegmentOG.jpg', temp)
     print('Stage 1: Segmentation Done')
 
     # feature extraction
@@ -56,13 +64,23 @@ def procedure(img):
         mask, img)
     print('Stage 2: Feature Extraction Done')
 
+    features = np.array([
+        Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, crc, ira, irb, irc,
+        ird, c_bb, c_bg, c_br, c_gg, c_br, c_gr, c_rr, adhocb1, adhocg1,
+        adhocr1, adhocb2, adhocg2, adhocr2
+    ]).reshape((1,24))
+
+   
     # classification
-    with open(CLASSIFICATION_MODEL_ARCH_PATH) as json_file:
-        model = keras.models.model_from_json(json_file)
+    json_file = open(CLASSIFICATION_MODEL_ARCH_PATH)
+    loaded_model_json = json_file.read()
+    json_file.close()
+    model = keras.models.model_from_json(loaded_model_json)
+
     model.load_weights(CLASSIFICATION_MODEL_WEIGHTS_PATH)
     model.compile(loss='binary_crossentropy',
                   optimizer='rmsprop', metrics=['accuracy'])
-    score = model.predict([img])[0]
+    score = int(model.predict([features])[0][0])
     print(f'Stage 3: Prediction Done ~ {score}')
 
     return score
