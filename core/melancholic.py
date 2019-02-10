@@ -42,8 +42,8 @@ def read(path):
 
 def procedure(img):
     # segmentation
-    unet_1 = cv2.cvtColor(unetSegment(img), cv2.COLOR_GRAY2BGR)
-    io.imsave('../temp_files/unetSegmentOG.jpg', unet_1)
+    unet_mask = cv2.cvtColor(unetSegment(img), cv2.COLOR_GRAY2BGR)
+    io.imsave('../temp_files/unetSegmentOG.jpg', unet_mask)
     
     mask, img = otsuThreshold(img)
     temp = [[[0,0,0] for x in range(0,600)] for y in range(0,450)]
@@ -51,9 +51,21 @@ def procedure(img):
         for j, m in enumerate(n):
             if m:
                 temp[i][j] = [255, 255, 255]
-    temp = np.array(temp, dtype=np.uint8)
+    otsu_mask = np.array(temp, dtype=np.uint8)
+    io.imsave('../temp_files/otsuSegmentOG.jpg', otsu_mask)
 
-    io.imsave('..//otsuSegmentOG.jpg', temp)
+    # combine unet and otsu's mask
+    for i in range(450):
+        for j in range(600):
+            otsu = otsu_mask[i][j]
+            unet  = unet_mask[i][j]
+
+            if any(np.array([255, 255, 255]) in [otsu, unet]):
+                temp[i][j] = (255,)*3
+            else:
+                temp[i][j] = (0,)*3
+    io.imsave('../temp_files/combinedSegmentOG.jpg', otsu_mask)
+
     print('Stage 1: Segmentation Done')
 
     # feature extraction
