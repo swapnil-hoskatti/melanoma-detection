@@ -44,8 +44,7 @@ def procedure(img):
     # segmentation
     unet_mask = cv2.cvtColor(unetSegment(img), cv2.COLOR_GRAY2BGR)
     io.imsave('../temp_files/unetSegmentOG.jpg', unet_mask)
-    ret,th1 = cv2.threshold(unet_mask,0.99,255,cv2.THRESH_BINARY)
-    th1 = th1.astype(np.uint8)
+    unet_mask = unet_mask.astype(np.uint8)
 
     mask, img = otsuThreshold(img)
     temp = [[[0,0,0] for x in range(0,600)] for y in range(0,450)]
@@ -60,8 +59,8 @@ def procedure(img):
     for i in range(450):
         for j in range(600):
             otsu = otsu_mask[i][j]
-            unet  = th1[i][j]
-            if (any(unet==[255,255,255]) or any(otsu==[255,255,255])):
+            unet  = unet_mask[i][j]
+            if (any(unet==[1,1,1]) or any(otsu==[255,255,255])):
                 temp[i][j] = [255,]*3
             else:
                 temp[i][j] = [0,]*3
