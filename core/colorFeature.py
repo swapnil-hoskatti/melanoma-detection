@@ -17,6 +17,8 @@ def covariance(mask, img):
                 g.append(img[i][j][1])
                 r.append(img[i][j][2])
     bg, br, gr = np.cov(b, g), np.cov(b, r), np.cov(g, r)
+    
+    #   B-B, B-G, B-R, G-G, G-R, R-R
     return bg[0][0], bg[0][1], br[0][1], bg[1][1], gr[0][1], gr[1][1]
 
 
