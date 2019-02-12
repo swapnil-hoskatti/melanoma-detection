@@ -106,4 +106,4 @@ ENV/
 .git
 
 # custom dirs
-./temp_files
+temp_files

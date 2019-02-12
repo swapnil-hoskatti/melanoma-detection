@@ -20,6 +20,7 @@ def unet(n_ch = 3,patch_height = 450,patch_width = 600,pretrained_weights = None
     conv1 = Conv2D(32, (3, 3), padding="same", name="conv1_1", activation="relu", data_format="channels_last")(inp)
     conv1 = Conv2D(32, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv1)
     pool1 = MaxPooling2D(pool_size=(2, 2), data_format="channels_last")(conv1)
+
     conv2 = Conv2D(64, (3, 3), padding="same", activation="relu", data_format="channels_last")(pool1)
     conv2 = Conv2D(64, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv2)
     pool2 = MaxPooling2D(pool_size=(2, 2), data_format="channels_last")(conv2)
@@ -34,10 +35,11 @@ def unet(n_ch = 3,patch_height = 450,patch_width = 600,pretrained_weights = None
 
     conv5 = Conv2D(512, (3, 3), padding="same", activation="relu", data_format="channels_last")(pool4)
     conv5 = Conv2D(512, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv5)
-
     up_conv5 = UpSampling2D(size=(2, 2), data_format="channels_last")(conv5)
+
     ch, cw = get_crop_shape(conv4, up_conv5)
     crop_conv4 = Cropping2D(cropping=(ch,cw), data_format="channels_last")(conv4)
+    
     up6   = concatenate([up_conv5, crop_conv4], axis=concat_axis)
     conv6 = Conv2D(256, (3, 3), padding="same", activation="relu", data_format="channels_last")(up6)
     conv6 = Conv2D(256, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv6)
@@ -45,6 +47,7 @@ def unet(n_ch = 3,patch_height = 450,patch_width = 600,pretrained_weights = None
     up_conv6 = UpSampling2D(size=(2, 2), data_format="channels_last")(conv6)
     ch, cw = get_crop_shape(conv3, up_conv6)
     crop_conv3 = Cropping2D(cropping=(ch,cw), data_format="channels_last")(conv3)
+    
     up7   = concatenate([up_conv6, crop_conv3], axis=concat_axis)
     conv7 = Conv2D(128, (3, 3), padding="same", activation="relu", data_format="channels_last")(up7)
     conv7 = Conv2D(128, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv7)
@@ -52,6 +55,7 @@ def unet(n_ch = 3,patch_height = 450,patch_width = 600,pretrained_weights = None
     up_conv7 = UpSampling2D(size=(2, 2), data_format="channels_last")(conv7)
     ch, cw = get_crop_shape(conv2, up_conv7)
     crop_conv2 = Cropping2D(cropping=(ch,cw), data_format="channels_last")(conv2)
+    
     up8   = concatenate([up_conv7, crop_conv2], axis=concat_axis)
     conv8 = Conv2D(64, (3, 3), padding="same", activation="relu", data_format="channels_last")(up8)
     conv8 = Conv2D(64, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv8)
@@ -59,6 +63,7 @@ def unet(n_ch = 3,patch_height = 450,patch_width = 600,pretrained_weights = None
     up_conv8 = UpSampling2D(size=(2, 2), data_format="channels_last")(conv8)
     ch, cw = get_crop_shape(conv1, up_conv8)
     crop_conv1 = Cropping2D(cropping=(ch,cw), data_format="channels_last")(conv1)
+    
     up9   = concatenate([up_conv8, crop_conv1], axis=concat_axis)
     conv9 = Conv2D(32, (3, 3), padding="same", activation="relu", data_format="channels_last")(up9)
     conv9 = Conv2D(32, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv9)
