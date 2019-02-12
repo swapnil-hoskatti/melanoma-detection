@@ -4,7 +4,7 @@
 #################################################################################
 
 # imports - imports for segmentation
-from core.segmentation import otsuThreshold, unetSegment
+from core.segmentation import otsuThreshold, unetSegment, largestBlobFinder
 
 # imports - imports for feature extraction
 from core.colorFeature import ColorFeatures
@@ -65,6 +65,9 @@ def procedure(img):
             else:
                 temp[i][j] = [0,]*3
     io.imsave('../temp_files/combinedSegmentOG.jpg', np.array(temp))
+
+    blob = largestBlobFinder(np.array(temp, dtype=np.uint8))
+    io.imsave('../temp_files/largestBlobOG.jpg',blob)
 
     print('Stage 1: Segmentation Done')
 

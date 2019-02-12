@@ -47,3 +47,41 @@ def otsuThreshold(img):
     img_bgr = cv2.cvtColor(img_bgr, cv2.COLOR_RGB2BGR)
     
     return mask, img_bgr.astype(np.uint64)
+
+def largestBlobFinder(image):
+    #takes input as "combinedSegmented" image
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    max_Area = 0
+    for i,cnt in enumerate(contours):
+        area = cv2.contourArea(cnt)
+        if area > max_Area:
+            max_Area = area
+            saved_contour = i
+
+    mask = np.zeros(image.shape, np.uint8)
+    result = cv2.drawContours(mask,contours,saved_contour,(255,255,255),-1)
+    result_copy = result.copy()
+    x,y = [],[]
+    for p,k in enumerate(result):
+        for q,j in enumerate(k):
+            if j == 255:
+                x.append(p)
+                y.append(q)
+    u,d,l,r=min(x),max(x),min(y),max(y)
+    c = (int((u+d)/2),int((l+r)/2))
+
+    h,w = result.shape[:2]
+    res = np.zeros((h+2, w+2), np.uint8)
+    cv2.floodFill(result, res, c, 255)
+    result = result | result_copy
+    
+    #if the largest blob found is exactly opposite of the ROI
+    if int(result[225][300]) != 255:
+        result = cv2.bitwise_not(result)
+
+    kernel = np.ones((7,7),np.uint8)
+    result = cv2.dilate(result,kernel,iterations = 2)
+
+    return result
