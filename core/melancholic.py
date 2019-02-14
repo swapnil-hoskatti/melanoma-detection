@@ -4,7 +4,7 @@
 #################################################################################
 
 # imports - imports for segmentation
-from core.segmentation import otsuThreshold, unetSegment, largestBlobFinder
+from core.segmentation import otsuThreshold, unetSegment, largestBlobFinder, getROI
 
 # imports - imports for feature extraction
 from core.colorFeature import ColorFeatures
@@ -15,17 +15,16 @@ from core.geometricFeature import GeometricFeatures
 from . import os, cv2, io, keras, np, morphology
 
 # constants - global constants for classification
-CLASSIFICATION_MODEL_ARCH_PATH = '../core/models/deep-classify.json'
-CLASSIFICATION_MODEL_WEIGHTS_PATH = '../core/models/deep-classify.h5'
+CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/deep-classify.json"
+CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/deep-classify.h5"
 
 
 # image acquisition
 def rsize(img):
     if img.shape != (450, 600, 3):
         # REF: https://stackoverflow.com/a/48121983/10309266
-        return cv2.resize(img, dsize=(600, 450),
-                         interpolation=cv2.INTER_CUBIC)
-        
+        return cv2.resize(img, dsize=(600, 450), interpolation=cv2.INTER_CUBIC)
+
     return img
 
 
@@ -35,7 +34,7 @@ def read(path):
         if img.any():
             return rsize(img)
         else:
-            return 'Oops!'
+            return "Oops!"
     else:
         return FileNotFoundError
 
@@ -43,49 +42,71 @@ def read(path):
 def procedure(img):
     # segmentation
     unet_mask = cv2.cvtColor(unetSegment(img), cv2.COLOR_GRAY2BGR)
-    io.imsave('../temp_files/unetSegmentOG.jpg', unet_mask)
+    io.imsave("../temp_files/unetSegmentOG.jpg", unet_mask)
     unet_mask = unet_mask.astype(np.uint8)
 
-    mask, img = otsuThreshold(img)
-    temp = [[[0,0,0] for x in range(0,600)] for y in range(0,450)]
+    mask = otsuThreshold(img)
+    temp = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)]
     for i, n in enumerate(mask):
         for j, m in enumerate(n):
             if m:
                 temp[i][j] = [255, 255, 255]
     otsu_mask = np.array(temp, dtype=np.uint8)
-    io.imsave('../temp_files/otsuSegmentOG.jpg', otsu_mask)
+    io.imsave("../temp_files/otsuSegmentOG.jpg", otsu_mask)
 
     # combine unet and otsu's mask
     for i in range(450):
         for j in range(600):
             otsu = otsu_mask[i][j]
-            unet  = unet_mask[i][j]
-            if (any(unet==[1,1,1]) or any(otsu==[255,255,255])):
-                temp[i][j] = [255,]*3
+            unet = unet_mask[i][j]
+            if any(unet == [1, 1, 1]) or any(otsu == [255, 255, 255]):
+                temp[i][j] = [255] * 3
             else:
-                temp[i][j] = [0,]*3
-    io.imsave('../temp_files/combinedSegmentOG.jpg', np.array(temp))
+                temp[i][j] = [0] * 3
+    io.imsave("../temp_files/combinedSegmentOG.jpg", np.array(temp))
 
     blob = largestBlobFinder(np.array(temp, dtype=np.uint8))
-    io.imsave('../temp_files/largestBlobOG.jpg',blob)
+    io.imsave("../temp_files/largestBlobOG.jpg", blob)
 
-    print('Stage 1: Segmentation Done')
+    print("Stage 1: Segmentation Done")
 
     # feature extraction
     crc, ira, irb, irc, ird, avgRadius, c = GeometricFeatures(mask)
     c_bb, c_bg, c_br, c_gg, c_gr, c_rr, adhocb1, adhocg1, adhocr1, adhocb2, adhocg2, adhocr2 = ColorFeatures(
-        mask, img, avgRadius, c)
-    Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk = TextureFeatures(
-        mask, img)
-    print('Stage 2: Feature Extraction Done')
+        mask, img, avgRadius, c
+    )
+    Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk = TextureFeatures(mask, img)
+    print("Stage 2: Feature Extraction Done")
 
-    features = np.array([
-        Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, crc, ira, irb, irc,
-        ird, c_bb, c_bg, c_br, c_gg, c_br, c_gr, c_rr, adhocb1, adhocg1,
-        adhocr1, adhocb2, adhocg2, adhocr2
-    ]).reshape((1,24))
+    features = np.array(
+        [
+            Bmean,
+            Gmean,
+            Rmean,
+            Bstd,
+            Gstd,
+            Rstd,
+            crc,
+            ira,
+            irb,
+            irc,
+            ird,
+            c_bb,
+            c_bg,
+            c_br,
+            c_gg,
+            c_br,
+            c_gr,
+            c_rr,
+            adhocb1,
+            adhocg1,
+            adhocr1,
+            adhocb2,
+            adhocg2,
+            adhocr2,
+        ]
+    ).reshape((1, 24))
 
-   
     # classification
     json_file = open(CLASSIFICATION_MODEL_ARCH_PATH)
     loaded_model_json = json_file.read()
@@ -93,15 +114,14 @@ def procedure(img):
     model = keras.models.model_from_json(loaded_model_json)
 
     model.load_weights(CLASSIFICATION_MODEL_WEIGHTS_PATH)
-    model.compile(loss='binary_crossentropy',
-                  optimizer='rmsprop', metrics=['accuracy'])
+    model.compile(loss="binary_crossentropy", optimizer="rmsprop", metrics=["accuracy"])
     score = int(model.predict([features])[0][0])
-    print(f'Stage 3: Prediction Done ~ {score}')
+    print(f"Stage 3: Prediction Done ~ {score}")
 
     return score
 
 
 def main_app(path):
     img = read(path)
-    print('Stage 0: Acquisition Done')
+    print("Stage 0: Acquisition Done")
     return procedure(img)
