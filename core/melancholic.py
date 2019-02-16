@@ -65,8 +65,11 @@ def procedure(img):
                 temp[i][j] = [0] * 3
     io.imsave("../temp_files/combinedSegmentOG.jpg", np.array(temp))
 
-    blob = largestBlobFinder(np.array(temp, dtype=np.uint8))
-    io.imsave("../temp_files/largestBlobOG.jpg", blob)
+    main_blob = mainBlob(np.array(temp, dtype=np.uint8))
+    io.imsave("../temp_files/mainBlobOG.jpg", blob)
+
+    roi = getROI(img, np.array(temp))
+    io.imsave("../temp_files/ROI.jpg",roi)
 
     print("Stage 1: Segmentation Done")
 
