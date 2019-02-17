@@ -53,7 +53,6 @@ def procedure(img):
                 temp[i][j] = [255, 255, 255]
                 c = c - 1
             else: c = c + 1
-    print(c)
     if c < 0:
         for p,i in enumerate(temp):
             for q,j in enumerate(i):
