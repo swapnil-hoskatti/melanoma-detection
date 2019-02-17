@@ -46,11 +46,20 @@ def procedure(img):
     unet_mask = unet_mask.astype(np.uint8)
 
     mask = otsuThreshold(img)
-    temp = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)]
+    temp,c = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)],0
     for i, n in enumerate(mask):
         for j, m in enumerate(n):
             if m:
                 temp[i][j] = [255, 255, 255]
+                c = c - 1
+            else: c = c + 1
+    print(c)
+    if c < 0:
+        for p,i in enumerate(temp):
+            for q,j in enumerate(i):
+                if j == [255,255,255]:
+                    temp[p][q] = [0,0,0]
+                else : temp[p][q] = [255,255,255] 
     otsu_mask = np.array(temp, dtype=np.uint8)
     io.imsave("../temp_files/otsuSegmentOG.jpg", otsu_mask)
 
