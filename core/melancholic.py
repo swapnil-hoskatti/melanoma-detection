@@ -4,7 +4,7 @@
 #################################################################################
 
 # imports - imports for segmentation
-from core.segmentation import otsuThreshold, unetSegment, largestBlobFinder, getROI
+from core.segmentation import otsuThreshold, unetSegment, mainBlob, getROI
 
 # imports - imports for feature extraction
 from core.colorFeature import ColorFeatures
@@ -66,7 +66,7 @@ def procedure(img):
     io.imsave("../temp_files/combinedSegmentOG.jpg", np.array(temp))
 
     main_blob = mainBlob(np.array(temp, dtype=np.uint8))
-    io.imsave("../temp_files/mainBlobOG.jpg", blob)
+    io.imsave("../temp_files/mainBlobOG.jpg", main_blob)
 
     roi = getROI(img, np.array(temp))
     io.imsave("../temp_files/ROI.jpg",roi)

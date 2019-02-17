@@ -33,7 +33,6 @@ $ pip install -r requirements.txt
 To run the application, change the current working directory to
 \./melanoma-detection/app
 ``` sourceCode console
-$ mkdir temp_files
 $ cd app
 ```
 

@@ -4,7 +4,7 @@
 #####################################
 
 # imports - final imports
-from . import cv2, morphology, np, threshold_otsu, keras, math
+from . import cv2, morphology, np, threshold_otsu, keras, sqrt
 
 
 def unetSegment(img):
@@ -58,7 +58,7 @@ def mainBlob(image):
         if M["m00"]!=0:
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-            dist = math.sqrt((cX-299)**2+(cY-224)**2)
+            dist = sqrt((cX-299)**2+(cY-224)**2)
             if mindist > dist:
                 saved_contour = i
                 mindist = dist
