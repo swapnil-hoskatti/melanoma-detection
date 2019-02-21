@@ -45,22 +45,10 @@ def procedure(img):
     io.imsave("../temp_files/unetSegmentOG.jpg", unet_mask)
     unet_mask = unet_mask.astype(np.uint8)
 
-    mask = otsuThreshold(img)
-    temp,c = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)],0
-    for i, n in enumerate(mask):
-        for j, m in enumerate(n):
-            if m:
-                temp[i][j] = [255, 255, 255]
-                c = c - 1
-            else: c = c + 1
-    if c < 0:
-        for p,i in enumerate(temp):
-            for q,j in enumerate(i):
-                if j == [255,255,255]:
-                    temp[p][q] = [0,0,0]
-                else : temp[p][q] = [255,255,255] 
-    otsu_mask = np.array(temp, dtype=np.uint8)
+    otsu_mask = otsuThreshold(img)
     io.imsave("../temp_files/otsuSegmentOG.jpg", otsu_mask)
+
+    temp = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)]
 
     # combine unet and otsu's mask
     for i in range(450):
@@ -73,10 +61,11 @@ def procedure(img):
                 temp[i][j] = [0] * 3
     io.imsave("../temp_files/combinedSegmentOG.jpg", np.array(temp))
 
-    main_blob = mainBlob(np.array(temp, dtype=np.uint8))
-    io.imsave("../temp_files/mainBlobOG.jpg", main_blob)
+    # mask.dtype -> bool
+    mask = mainBlob(np.array(temp, dtype=np.uint8))
+    io.imsave("../temp_files/mainBlobOG.jpg", np.array(mask, dtype = np.uint8)*255)
 
-    roi = getROI(img, np.array(temp))
+    roi = getROI(img, np.array(mask))
     io.imsave("../temp_files/ROI.jpg",roi)
 
     print("Stage 1: Segmentation Done")

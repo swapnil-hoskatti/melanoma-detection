@@ -32,7 +32,24 @@ def otsuThreshold(img):
 
     temp = morphology.remove_small_objects(binary_global, min_size=500, connectivity=1)
     mask = morphology.remove_small_holes(temp, 500, connectivity=2)
-
+    
+    # Extraction of lighter lesions
+    
+    temp,c = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)],0
+    for i, n in enumerate(mask):
+        for j, m in enumerate(n):
+            if m:
+                temp[i][j] = [255, 255, 255]
+                c = c - 1
+            else: c = c + 1
+    if c < 0:
+        for p,i in enumerate(temp):
+            for q,j in enumerate(i):
+                if j == [255,255,255]:
+                    temp[p][q] = [0,0,0]
+                else : temp[p][q] = [255,255,255] 
+    mask = np.array(temp, dtype=np.uint8)
+    
     return mask
 
 
@@ -40,7 +57,7 @@ def getROI(img, mask):
     # maps mask with img to generate ROI
     for i in range(len(img)):
         for j in range(len(img[0])):
-            if any(mask[i][j]) == 0:
+            if mask[i][j] == 0:
                 img[i][j] = (0, 0, 0)
 
     return cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
@@ -72,5 +89,7 @@ def mainBlob(image):
 
     kernel = np.ones((7,7), np.uint8)
     result = cv2.dilate(result, kernel, iterations=2)
+
+    result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel).astype(np.bool_)
 
     return result
