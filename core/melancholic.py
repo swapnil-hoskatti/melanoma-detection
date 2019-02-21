@@ -21,6 +21,11 @@ CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/deep-classify.h5"
 
 # image acquisition
 def rsize(img):
+    """
+    description: resizing to fixed dimens
+    params: np.ndarray -> uint8 :: values = (0, 255)
+    returns: np.ndarray -> uint8 :: values = (0, 255)
+    """
     if img.shape != (450, 600, 3):
         # REF: https://stackoverflow.com/a/48121983/10309266
         return cv2.resize(img, dsize=(600, 450), interpolation=cv2.INTER_CUBIC)
@@ -29,9 +34,15 @@ def rsize(img):
 
 
 def read(path):
+    """
+    description: image acquisition
+    params: np.ndarray -> uint8 :: values = (0, 255)
+    returns: np.ndarray -> uint8 :: values = (0, 255)
+    """
     if os.path.isfile(path):
         img = cv2.imread(path)
         if img.any():
+            print("Stage 0: Acquisition Done")
             return rsize(img)
         else:
             return "Oops!"
@@ -40,6 +51,11 @@ def read(path):
 
 
 def procedure(img):
+    """
+    description: main algorithm
+    params: np.ndarray -> uint8 :: values = (0, 255)
+    returns: int (label data) :: values = (0, 6)
+    """
     # segmentation
     unet_mask = cv2.cvtColor(unetSegment(img), cv2.COLOR_GRAY2BGR)
     io.imsave("../temp_files/unetSegmentOG.jpg", unet_mask)
@@ -63,10 +79,10 @@ def procedure(img):
 
     # mask.dtype -> bool
     mask = mainBlob(np.array(temp, dtype=np.uint8))
-    io.imsave("../temp_files/mainBlobOG.jpg", np.array(mask, dtype = np.uint8)*255)
+    io.imsave("../temp_files/mainBlobOG.jpg", np.array(mask, dtype=np.uint8) * 255)
 
     roi = getROI(img, np.array(mask))
-    io.imsave("../temp_files/ROI.jpg",roi)
+    io.imsave("../temp_files/ROI.jpg", roi)
 
     print("Stage 1: Segmentation Done")
 
@@ -78,7 +94,7 @@ def procedure(img):
     Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk = TextureFeatures(mask, img)
     print("Stage 2: Feature Extraction Done")
 
-    features = np.array(
+    features = [
         [
             Bmean,
             Gmean,
@@ -105,7 +121,7 @@ def procedure(img):
             adhocg2,
             adhocr2,
         ]
-    ).reshape((1, 24))
+    ]
 
     # classification
     json_file = open(CLASSIFICATION_MODEL_ARCH_PATH)
@@ -122,6 +138,10 @@ def procedure(img):
 
 
 def main_app(path):
+    """
+    description: importable to FLASK app
+    params: str (path)
+    returns: int (label) :: values = (0, 6)
+    """
     img = read(path)
-    print("Stage 0: Acquisition Done")
     return procedure(img)

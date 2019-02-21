@@ -8,6 +8,11 @@ from . import cv2, morphology, np, threshold_otsu, keras, sqrt
 
 
 def unetSegment(img):
+    """
+    description: unet segmentation
+    params: np.ndarray -> uint8 :: values = (0, 255)
+    returns: np.ndarray -> float32 :: values = (0, 1)
+    """
     img = np.expand_dims(img, axis=0)
     CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/unet-segment.json"
     CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/unet-segment.h5"
@@ -20,11 +25,17 @@ def unetSegment(img):
     model.load_weights(CLASSIFICATION_MODEL_WEIGHTS_PATH)
     model.compile(loss="binary_crossentropy", optimizer="rmsprop", metrics=["accuracy"])
 
-    return model.predict([img])[0]
+    unet_mask = model.predict([img])[0]
+
+    return unet_mask
 
 
 def otsuThreshold(img):
-    img = img.astype(np.uint8)
+    """
+    description: otsu's + modifications to remove lighter skin lesions
+    params: np.ndarray -> uint8 :: values = (0, 255)
+    returns:
+    """
     img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
     global_thresh = threshold_otsu(img_gray)
@@ -32,29 +43,38 @@ def otsuThreshold(img):
 
     temp = morphology.remove_small_objects(binary_global, min_size=500, connectivity=1)
     mask = morphology.remove_small_holes(temp, 500, connectivity=2)
+
+    temp, c = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)], 0
     
     # Extraction of lighter lesions
-    
-    temp,c = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)],0
     for i, n in enumerate(mask):
         for j, m in enumerate(n):
             if m:
                 temp[i][j] = [255, 255, 255]
                 c = c - 1
-            else: c = c + 1
+            else:
+                c = c + 1
     if c < 0:
-        for p,i in enumerate(temp):
-            for q,j in enumerate(i):
-                if j == [255,255,255]:
-                    temp[p][q] = [0,0,0]
-                else : temp[p][q] = [255,255,255] 
+        for p, i in enumerate(temp):
+            for q, j in enumerate(i):
+                if j == [255, 255, 255]:
+                    temp[p][q] = [0, 0, 0]
+                else:
+                    temp[p][q] = [255, 255, 255]
     mask = np.array(temp, dtype=np.uint8)
-    
+
     return mask
 
 
 def getROI(img, mask):
-    # maps mask with img to generate ROI
+    """
+    description: maps mask with img to generate ROI
+    params:
+        img:
+        mask:
+    returns:
+    """
+
     for i in range(len(img)):
         for j in range(len(img[0])):
             if mask[i][j] == 0:
@@ -64,22 +84,26 @@ def getROI(img, mask):
 
 
 def mainBlob(image):
-    ### takes input as "combinedSegmented" image
+    """
+    description: finds blob closest to the center of image
+    params:
+    returns:
+    """
+
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
     contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
     mindist = 999.9
+
     for i, cnt in enumerate(contours):
         M = cv2.moments(cnt)
-        if M["m00"]!=0:
+        if M["m00"] != 0:
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-            dist = sqrt((cX-299)**2+(cY-224)**2)
+            dist = sqrt((cX - 299) ** 2 + (cY - 224) ** 2)
             if mindist > dist:
                 saved_contour = i
                 mindist = dist
-                c = (cX,cY)
+                c = (cX, cY)
     mask = np.zeros(image.shape, np.uint8)
     result = cv2.drawContours(mask, contours, saved_contour, (255, 255, 255), -1)
 
@@ -87,9 +111,8 @@ def mainBlob(image):
     res = np.zeros((h + 2, w + 2), np.uint8)
     cv2.floodFill(result, res, c, 255)
 
-    kernel = np.ones((7,7), np.uint8)
-    result = cv2.dilate(result, kernel, iterations=2)
-
-    result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel).astype(np.bool_)
+    kernel = np.ones((7, 7), np.uint8)
+    dilated_img = cv2.dilate(result, kernel, iterations=2)
+    result = cv2.morphologyEx(dilated_img, cv2.MORPH_CLOSE, kernel).astype(np.bool_)
 
     return result
