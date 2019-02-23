@@ -61,7 +61,7 @@ def procedure(img):
     io.imsave("../temp_files/unetSegmentOG.jpg", unet_mask)
     unet_mask = unet_mask.astype(np.uint8)
 
-    otsu_mask = otsuThreshold(img)
+    otsu_mask = otsuThreshold(img) * 255
     io.imsave("../temp_files/otsuSegmentOG.jpg", otsu_mask)
 
     temp = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)]
