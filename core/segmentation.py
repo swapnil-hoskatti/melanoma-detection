@@ -44,25 +44,6 @@ def otsuThreshold(img):
     temp = morphology.remove_small_objects(binary_global, min_size=500, connectivity=1)
     mask = morphology.remove_small_holes(temp, 500, connectivity=2)
 
-    temp, c = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)], 0
-    
-    # Extraction of lighter lesions
-    for i, n in enumerate(mask):
-        for j, m in enumerate(n):
-            if m:
-                temp[i][j] = [255, 255, 255]
-                c = c - 1
-            else:
-                c = c + 1
-    if c < 0:
-        for p, i in enumerate(temp):
-            for q, j in enumerate(i):
-                if j == [255, 255, 255]:
-                    temp[p][q] = [0, 0, 0]
-                else:
-                    temp[p][q] = [255, 255, 255]
-    mask = np.array(temp, dtype=np.uint8)
-
     return mask
 
 
@@ -90,8 +71,26 @@ def mainBlob(image):
     returns:
     """
 
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    temp, c = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)], 0
+    
+    # Extraction of lighter lesions
+    for i, n in enumerate(mask):
+        for j, m in enumerate(n):
+            if m:
+                temp[i][j] = [255, 255, 255]
+                c = c - 1
+            else:
+                c = c + 1
+    if c < 0:
+        for p, i in enumerate(temp):
+            for q, j in enumerate(i):
+                if j == [255, 255, 255]:
+                    temp[p][q] = [0, 0, 0]
+                else:
+                    temp[p][q] = [255, 255, 255]
+    mask = np.array(temp, dtype=np.uint8)
+    mask = cv2.cvtColor(mask,cv2.COLOR_BGR2GRAY)
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     mindist = 999.9
 
     for i, cnt in enumerate(contours):
@@ -99,20 +98,24 @@ def mainBlob(image):
         if M["m00"] != 0:
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-            dist = sqrt((cX - 299) ** 2 + (cY - 224) ** 2)
+            dist = math.sqrt((cX - 299) ** 2 + (cY - 224) ** 2)
             if mindist > dist:
                 saved_contour = i
                 mindist = dist
                 c = (cX, cY)
-    mask = np.zeros(image.shape, np.uint8)
-    result = cv2.drawContours(mask, contours, saved_contour, (255, 255, 255), -1)
-
-    h, w = result.shape[:2]
-    res = np.zeros((h + 2, w + 2), np.uint8)
-    cv2.floodFill(result, res, c, 255)
+    mask = np.zeros(img_gray.shape, np.uint8)
+    mask = cv2.drawContours(mask, contours, saved_contour, (255, 255, 255), -1)
+    h, w = mask.shape[:2]
+    if (mask[c[1]][c[0]] == 255):
+        res = np.zeros((h + 2, w + 2), np.uint8)
+        cv2.floodFill(mask, res, c, 255)
+    else :
+        res = np.ones((h + 2, w + 2), np.uint8)
+        cv2.floodFill(mask, res, c, 0)
+        mask = cv2.bitwise_not(mask)
 
     kernel = np.ones((7, 7), np.uint8)
-    dilated_img = cv2.dilate(result, kernel, iterations=2)
+    dilated_img = cv2.dilate(mask, kernel, iterations=2)
     result = cv2.morphologyEx(dilated_img, cv2.MORPH_CLOSE, kernel).astype(np.bool_)
 
     return result
