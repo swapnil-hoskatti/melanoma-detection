@@ -85,4 +85,4 @@ def GeometricFeatures(mask):
 
     ird = gd - sd
 
-    return crc, ira, irb, irc, ird, avgradius, c
+return crc, ira, irb, irc, ird, avgradius, c
