@@ -38,7 +38,7 @@ def GeometricFeatures(mask):
     count = 0
     for i in range(0, 450):
         for j in range(0, 600):
-            if m[i][j] == True:
+            if mask[i][j] == True:
 
                 sy += i
                 sx += j
@@ -85,4 +85,4 @@ def GeometricFeatures(mask):
 
     ird = gd - sd
 
-return crc, ira, irb, irc, ird, avgradius, c
+    return crc, ira, irb, irc, ird, avgradius, c

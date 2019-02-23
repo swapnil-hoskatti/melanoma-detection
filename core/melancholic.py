@@ -78,7 +78,7 @@ def procedure(img):
     io.imsave("../temp_files/combinedSegmentOG.jpg", np.array(temp))
 
     # mask.dtype -> bool
-    mask = mainBlob(np.array(temp, dtype=np.uint8))
+    mask = mainBlob(np.array(temp, dtype=np.uint8), otsu_mask)
     io.imsave("../temp_files/mainBlobOG.jpg", np.array(mask, dtype=np.uint8) * 255)
 
     roi = getROI(img, np.array(mask))

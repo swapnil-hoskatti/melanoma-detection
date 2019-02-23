@@ -64,7 +64,7 @@ def getROI(img, mask):
     return cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
 
 
-def mainBlob(image):
+def mainBlob(image, mask):
     """
     description: finds blob closest to the center of image
     params:
@@ -98,12 +98,12 @@ def mainBlob(image):
         if M["m00"] != 0:
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-            dist = math.sqrt((cX - 299) ** 2 + (cY - 224) ** 2)
+            dist = sqrt((cX - 299) ** 2 + (cY - 224) ** 2)
             if mindist > dist:
                 saved_contour = i
                 mindist = dist
                 c = (cX, cY)
-    mask = np.zeros(img_gray.shape, np.uint8)
+    mask = np.zeros(mask.shape, np.uint8)
     mask = cv2.drawContours(mask, contours, saved_contour, (255, 255, 255), -1)
     h, w = mask.shape[:2]
     if (mask[c[1]][c[0]] == 255):
