@@ -6,9 +6,6 @@
 # imports - final imports
 from . import median, np, stats, cv2
 
-# global constants
-ROUND_FACTOR = 4
-
 
 def __histogram(img):
     b_, g_, r_ = cv2.split(img)
@@ -108,22 +105,22 @@ def features(bins):
 
     for bin_name, pixels in bins.items():
 
-        Bmean = round(mean([x[0] for x in pixels])[0], ROUND_FACTOR)
-        Gmean = round(mean([x[1] for x in pixels])[0], ROUND_FACTOR)
-        Rmean = round(mean([x[2] for x in pixels])[0], ROUND_FACTOR)
+        Bmean = mean([x[0] for x in pixels])[0]
+        Gmean = mean([x[1] for x in pixels])[0]
+        Rmean = mean([x[2] for x in pixels])[0]
 
         # dont round it as its not directly used
         Bmode = (mode([x[0] for x in pixels])[0])[0]
         Gmode = (mode([x[1] for x in pixels])[0])[0]
         Rmode = (mode([x[2] for x in pixels])[0])[0]
 
-        Bstd = round(std_dev([x[0] for x in pixels])[0], ROUND_FACTOR)
-        Gstd = round(std_dev([x[1] for x in pixels])[0], ROUND_FACTOR)
-        Rstd = round(std_dev([x[2] for x in pixels])[0], ROUND_FACTOR)
+        Bstd = std_dev([x[0] for x in pixels])[0]
+        Gstd = std_dev([x[1] for x in pixels])[0]
+        Rstd = std_dev([x[2] for x in pixels])[0]
 
-        Bsk = round(skewness(Bmean, Bmode, Bstd)[0], ROUND_FACTOR)
-        Gsk = round(skewness(Gmean, Gmode, Gstd)[0], ROUND_FACTOR)
-        Rsk = round(skewness(Rmean, Rmode, Rstd)[0], ROUND_FACTOR)
+        Bsk = skewness(Bmean, Bmode, Bstd)[0]
+        Gsk = skewness(Gmean, Gmode, Gstd)[0]
+        Rsk = skewness(Rmean, Rmode, Rstd)[0]
 
         return Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk
 

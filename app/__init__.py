@@ -1,0 +1,1 @@
+print("Estimated load time: 2.5s")
