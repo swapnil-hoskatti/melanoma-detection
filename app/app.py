@@ -1,6 +1,7 @@
 # imports - standard imports
 import json
 import os
+import warnings
 
 # imports - third party imports
 from flask import Flask, flash, redirect
@@ -11,6 +12,9 @@ from werkzeug.utils import secure_filename
 # imports - module imports
 from core.melancholic import main_app as melancholic
 
+# ignoring warnings and TF logs
+warnings.filterwarnings("ignore")
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # setting up constants
 UPLOAD_FOLDER = "../temp_files/"

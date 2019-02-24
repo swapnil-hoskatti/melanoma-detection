@@ -18,6 +18,8 @@ from . import os, cv2, io, keras, np, morphology
 CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/deep-classify.json"
 CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/deep-classify.h5"
 
+# global constants
+ROUND_FACTOR = 4
 
 # image acquisition
 def rsize(img):
@@ -122,6 +124,9 @@ def procedure(img):
             adhocr2,
         ]
     ]
+
+    # Only for testing:
+    print([round(x, ROUND_FACTOR) for x in features[0]])
 
     # classification
     json_file = open(CLASSIFICATION_MODEL_ARCH_PATH)
