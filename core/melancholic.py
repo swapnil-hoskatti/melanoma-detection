@@ -10,6 +10,7 @@ from core.segmentation import otsuThreshold, unetSegment, mainBlob, getROI
 from core.colorFeature import ColorFeatures
 from core.textureFeature import TextureFeatures
 from core.geometricFeature import GeometricFeatures
+from core.clean import remove_hair
 
 # imports - final imports
 from . import os, cv2, io, keras, np, morphology
@@ -58,12 +59,16 @@ def procedure(img):
     params: np.ndarray -> uint8 :: values = (0, 255)
     returns: int (label data) :: values = (0, 6)
     """
+    # pre processing
+    hair_rem = remove_hair(img)
+    io.imsave("../temp_files/hairOG.jpg", hair_rem)
+
     # segmentation
-    unet_mask = cv2.cvtColor(unetSegment(img), cv2.COLOR_GRAY2BGR)
+    unet_mask = cv2.cvtColor(unetSegment(hair_rem), cv2.COLOR_GRAY2BGR)
     io.imsave("../temp_files/unetSegmentOG.jpg", unet_mask)
     unet_mask = unet_mask.astype(np.uint8)
 
-    otsu_mask = otsuThreshold(img) * 255
+    otsu_mask = otsuThreshold(hair_rem) * 255
     io.imsave("../temp_files/otsuSegmentOG.jpg", otsu_mask)
 
     temp = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)]
@@ -80,7 +85,7 @@ def procedure(img):
     io.imsave("../temp_files/combinedSegmentOG.jpg", np.array(temp))
 
     # mask.dtype -> bool
-    mask = mainBlob(np.array(temp, dtype=np.uint8), otsu_mask)
+    mask = mainBlob(np.array(temp, dtype=np.uint8))
     io.imsave("../temp_files/mainBlobOG.jpg", np.array(mask, dtype=np.uint8) * 255)
 
     roi = getROI(img, np.array(mask))

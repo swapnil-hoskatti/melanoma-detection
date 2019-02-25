@@ -64,7 +64,7 @@ def getROI(img, mask):
     return cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
 
 
-def mainBlob(image, mask):
+def mainBlob(mask):
     """
     description: finds blob closest to the center of image
     params:
@@ -76,7 +76,7 @@ def mainBlob(image, mask):
     # Extraction of lighter lesions
     for i, n in enumerate(mask):
         for j, m in enumerate(n):
-            if m:
+            if any(m):
                 temp[i][j] = [255, 255, 255]
                 c = c - 1
             else:
