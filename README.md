@@ -13,11 +13,18 @@
 
 ## Installation
 
-Clone the git repository:
+Clone the git repository
 
 ``` sourceCode console
 $ git clone https://github.com/gavindsouza/melanoma-detection.git
 $ cd melanoma-detection
+```
+
+Make a virtual environment and activate it
+
+``` sourceCode console
+$ python -m venv venv
+$ source venv/bin/activate
 ```
 
 Install necessary dependencies
