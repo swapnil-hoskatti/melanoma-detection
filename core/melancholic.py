@@ -131,7 +131,7 @@ def procedure(img):
     ]
 
     # Only for testing:
-    print([round(x, ROUND_FACTOR) for x in features[0]])
+    # print([round(x, ROUND_FACTOR) for x in features[0]])
 
     # classification
     json_file = open(CLASSIFICATION_MODEL_ARCH_PATH)
