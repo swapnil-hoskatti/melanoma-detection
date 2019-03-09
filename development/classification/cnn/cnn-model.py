@@ -22,15 +22,26 @@ epochs = 12
 
 # input image dimensions
 img_rows, img_cols = 450, 600
-
-mel = [imread(x) for x in os.listdir() if x[:3] == 'mel']
-nev = [imread(x) for x in os.listdir() if x[:3] == 'nev']
+mel = [imread(os.path.join('all', 'MEL', x)) for x in os.listdir(os.path.join('all', 'MEL'))]
+nev = [imread(os.path.join('all', 'NV', x)) for x in os.listdir(os.path.join('all', 'NV'))]
+df = [imread(x) for x in os.listdir(os.path.join('all', 'DF'))]
+bkl = [imread(x) for x in os.listdir(os.path.join('all', 'BKL'))]
+akiec = [imread(x) for x in os.listdir(os.path.join('all', 'AKIEC'))]
+vasc = [imread(x) for x in os.listdir(os.path.join('all', 'VASC'))]
+bcc = [imread(x) for x in os.listdir(os.path.join('all', 'BCC'))]
 
 cut_mel = int(len(mel)*0.8)
 cut_nev = int(len(nev)*0.8)
+cut_df = int(len(df)*0.8)
+cut_bkl = int(len(bkl)*0.8)
+cut_akiec = int(len(akiec)*0.8)
+cut_vasc = int(len(vasc)*0.8)
+cut_bcc = int(len(bcc)*0.8)
 
-x_train = np.array(mel[:cut_mel] + nev[:cut_nev])
-x_test = np.array(mel[cut_mel:] + nev[cut_nev:])
+x_train = np.array(mel[:cut_mel] + nev[:cut_nev] + df[:cut_df] +
+                   bkl[:cut_bkl] + akiec[:cut_akiec] + vasc[:cut_vasc] + bcc[:cut_bcc])
+x_test = np.array(mel[cut_mel:] + nev[cut_nev:] + df[cut_df:] +
+                  bkl[cut_bkl:] + akiec[cut_akiec:] + vasc[cut_vasc:] + bcc[cut_bcc:])
 
 y_train = np.array([1 for x in mel][:cut_mel] + [0 for x in nev][:cut_nev])
 y_test = np.array([1 for x in mel][cut_mel:] + [0 for x in nev][cut_nev:])
