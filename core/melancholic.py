@@ -54,6 +54,7 @@ def read(path):
 
 
 def procedure(img):
+    global CLASSIFICATION_MODEL_ARCH_PATH, CLASSIFICATION_MODEL_WEIGHTS_PATH
     """
     description: main algorithm
     params: np.ndarray -> uint8 :: values = (0, 255)
@@ -143,6 +144,17 @@ def procedure(img):
     model.compile(loss="binary_crossentropy", optimizer="rmsprop", metrics=["accuracy"])
     score = int(model.predict([features])[0][0])
     print(f"Stage 3: Prediction Done ~ {score}")
+
+    # CNN here
+    CLASSIFICATION_MODEL_ARCH_PATH = '../core/models/vgg_16.json'
+    CLASSIFICATION_MODEL_WEIGHTS_PATH = '../core/models/vgg_16-model-val_acc-76-acc-80.hdf5'
+    json_file = open(CLASSIFICATION_MODEL_ARCH_PATH).read()
+    model_cnn = keras.models.model_from_json(json_file)
+    model_cnn.compile(loss="binary_crossentropy", optimizer="rmsprop", metrics=["accuracy"])
+    score = int(model.predict([
+        roi.reshape((1, 256, 256, 3))
+        ])[0][0])
+    print(f"Stage 3: CNN Prediction Done ~ {score}")
 
     return score
 
