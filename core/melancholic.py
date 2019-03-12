@@ -16,8 +16,10 @@ from core.clean import remove_hair
 from . import os, cv2, io, keras, np, morphology
 
 # constants - global constants for classification
-CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/deep-classify.json"
-CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/deep-classify.h5"
+DNN_CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/deep-classify.json"
+DNN_CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/deep-classify.h5"
+CNN_CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/vgg_16.json"
+CNN_CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/vgg_16-model-val_acc-76-acc-80.hdf5"
 
 # global constants
 ROUND_FACTOR = 4
@@ -54,7 +56,6 @@ def read(path):
 
 
 def procedure(img):
-    global CLASSIFICATION_MODEL_ARCH_PATH, CLASSIFICATION_MODEL_WEIGHTS_PATH
     """
     description: main algorithm
     params: np.ndarray -> uint8 :: values = (0, 255)
@@ -134,28 +135,30 @@ def procedure(img):
     # Only for testing:
     # print([round(x, ROUND_FACTOR) for x in features[0]])
 
-    # classification
-    json_file = open(CLASSIFICATION_MODEL_ARCH_PATH)
-    loaded_model_json = json_file.read()
-    json_file.close()
+    # DNN here
+    loaded_model_json = open(DNN_CLASSIFICATION_MODEL_ARCH_PATH).read()
     model = keras.models.model_from_json(loaded_model_json)
-
-    model.load_weights(CLASSIFICATION_MODEL_WEIGHTS_PATH)
+    model.load_weights(DNN_CLASSIFICATION_MODEL_WEIGHTS_PATH)
     model.compile(loss="binary_crossentropy", optimizer="rmsprop", metrics=["accuracy"])
     score = int(model.predict([features])[0][0])
     print(f"Stage 3: Prediction Done ~ {score}")
 
     # CNN here
-    CLASSIFICATION_MODEL_ARCH_PATH = '../core/models/vgg_16.json'
-    CLASSIFICATION_MODEL_WEIGHTS_PATH = '../core/models/vgg_16-model-val_acc-76-acc-80.hdf5'
-    json_file = open(CLASSIFICATION_MODEL_ARCH_PATH).read()
+    json_file = open(CNN_CLASSIFICATION_MODEL_ARCH_PATH).read()
     model_cnn = keras.models.model_from_json(json_file)
+    model_cnn.load_weights(CNN_CLASSIFICATION_MODEL_WEIGHTS_PATH)
     model_cnn.compile(loss="binary_crossentropy", optimizer="rmsprop", metrics=["accuracy"])
-    score = int(model.predict([
-        roi.reshape((1, 256, 256, 3))
-        ])[0][0])
+    score = int(model_cnn.predict_classes([
+        cv2.resize(
+                roi,
+                dsize=(256, 256),
+                interpolation=cv2.INTER_CUBIC
+            ).reshape((1, 256, 256, 3))
+        ]))
     print(f"Stage 3: CNN Prediction Done ~ {score}")
-
+    # 5 - VASC ??? everything gets predicted as 5. needs more testing
+    print("---"*10)
+    
     return score
 
 
