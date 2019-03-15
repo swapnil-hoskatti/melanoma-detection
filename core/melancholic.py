@@ -100,17 +100,14 @@ def procedure(img):
     c_bb, c_bg, c_br, c_gg, c_gr, c_rr, adhocb1, adhocg1, adhocr1, adhocb2, adhocg2, adhocr2 = ColorFeatures(
         mask, img, avgRadius, c
     )
-    Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk = TextureFeatures(mask, img)
+    # textureFeatures return a tuple of 8 * 9
+    texture_features = list(TextureFeatures(mask, img))
     print("Stage 2: Feature Extraction Done")
 
     features = [
+        texture_features
+            +
         [
-            Bmean,
-            Gmean,
-            Rmean,
-            Bstd,
-            Gstd,
-            Rstd,
             crc,
             ira,
             irb,
@@ -133,8 +130,9 @@ def procedure(img):
     ]
 
     # Only for testing:
-    # print([round(x, ROUND_FACTOR) for x in features[0]])
-
+    print([round(x, ROUND_FACTOR) for x in features[0]])
+    return
+    
     # DNN here
     loaded_model_json = open(DNN_CLASSIFICATION_MODEL_ARCH_PATH).read()
     model = keras.models.model_from_json(loaded_model_json)

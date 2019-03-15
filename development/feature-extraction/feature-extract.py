@@ -30,8 +30,7 @@ def otsuThreshold(img):
     global_thresh = threshold_otsu(img_gray)
     binary_global = img_gray < global_thresh
 
-    temp = morphology.remove_small_objects(
-        binary_global, min_size=500, connectivity=1)
+    temp = morphology.remove_small_objects(binary_global, min_size=500, connectivity=1)
     mask = morphology.remove_small_holes(temp, 500, connectivity=2)
 
     temp, c = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)], 0
@@ -81,8 +80,7 @@ def mainBlob(image):
     """
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    contours, _ = cv2.findContours(
-        image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     mindist = 999.9
 
     for i, cnt in enumerate(contours):
@@ -96,8 +94,7 @@ def mainBlob(image):
                 mindist = dist
                 c = (cX, cY)
     mask = np.zeros(image.shape, np.uint8)
-    result = cv2.drawContours(
-        mask, contours, saved_contour, (255, 255, 255), -1)
+    result = cv2.drawContours(mask, contours, saved_contour, (255, 255, 255), -1)
 
     h, w = result.shape[:2]
     res = np.zeros((h + 2, w + 2), np.uint8)
@@ -105,8 +102,7 @@ def mainBlob(image):
 
     kernel = np.ones((7, 7), np.uint8)
     dilated_img = cv2.dilate(result, kernel, iterations=2)
-    result = cv2.morphologyEx(
-        dilated_img, cv2.MORPH_CLOSE, kernel).astype(np.bool_)
+    result = cv2.morphologyEx(dilated_img, cv2.MORPH_CLOSE, kernel).astype(np.bool_)
 
     return result
 
@@ -135,9 +131,9 @@ def adhoc(m, image, avgradius, ratio, c):
     cy = c[1]
     for i in range(0, 450):
         for j in range(0, 600):
-            a = avgradius*ratio
-            if(m[i][j] == True):
-                if(np.linalg.norm(np.array([cx, cy])-np.array([j, i])) <= a):
+            a = avgradius * ratio
+            if m[i][j] == True:
+                if np.linalg.norm(np.array([cx, cy]) - np.array([j, i])) <= a:
                     central[0] += image[i][j][0]
                     central[1] += image[i][j][1]
                     central[2] += image[i][j][2]
@@ -149,16 +145,16 @@ def adhoc(m, image, avgradius, ratio, c):
                     ab += 1
 
     total = [sum(x) for x in zip(central, border)]
-    count_pixels = ac+ab
+    count_pixels = ac + ab
 
     try:
-        central = [i/ac for i in central]
-        border = [i/ab for i in border]
+        central = [i / ac for i in central]
+        border = [i / ab for i in border]
 
         adhoc = [0, 0, 0]
-        adhoc[0] = central[0]/border[0]
-        adhoc[1] = central[1]/border[1]
-        adhoc[2] = central[2]/border[2]
+        adhoc[0] = central[0] / border[0]
+        adhoc[1] = central[1] / border[1]
+        adhoc[2] = central[2] / border[2]
 
         return adhoc[0], adhoc[1], adhoc[2]
     except:
@@ -167,10 +163,23 @@ def adhoc(m, image, avgradius, ratio, c):
 
 def ColorFeatures(mask, image, avgRadius, c):
     c_bb, c_bg, c_br, c_gg, c_gr, c_rr = covariance(mask, image)
-    adhocb1, adhocg1, adhocr1 = adhoc(mask, image, avgRadius, 1/3, c)
-    adhocb2, adhocg2, adhocr2 = adhoc(mask, image, avgRadius, 9/10, c)
+    adhocb1, adhocg1, adhocr1 = adhoc(mask, image, avgRadius, 1 / 3, c)
+    adhocb2, adhocg2, adhocr2 = adhoc(mask, image, avgRadius, 9 / 10, c)
 
-    return c_bb, c_bg, c_br, c_gg, c_gr, c_rr, adhocb1, adhocg1, adhocr1, adhocb2, adhocg2, adhocr2
+    return (
+        c_bb,
+        c_bg,
+        c_br,
+        c_gg,
+        c_gr,
+        c_rr,
+        adhocb1,
+        adhocg1,
+        adhocr1,
+        adhocb2,
+        adhocg2,
+        adhocr2,
+    )
 
 
 def GeometricFeatures(m):
@@ -181,24 +190,24 @@ def GeometricFeatures(m):
 
     for l in m:
         for p in l:
-            if(p == True):
+            if p == True:
                 areapixels += 1
 
     # areapixels/=10
     a = areapixels
     for l in edges1:
         for p in l:
-            if(p == True):
+            if p == True:
                 perimeterpixels += 1
 
     # perimeterpixels/=10
     p = perimeterpixels
     # CIRCULARITY INDEX
-    crc = (4*areapixels*3.14)/(perimeterpixels*perimeterpixels)
+    crc = (4 * areapixels * 3.14) / (perimeterpixels * perimeterpixels)
     # print(crc)
 
     # IRREGULARITY INDEX A
-    ira = p/a
+    ira = p / a
     # print(ira)
 
     sx = 0
@@ -211,8 +220,8 @@ def GeometricFeatures(m):
                 sy += i
                 sx += j
                 count += 1
-    cx = int(sx/count)
-    cy = int(sy/count)
+    cx = int(sx / count)
+    cy = int(sy / count)
 
     c = [cx, cy]
 
@@ -226,32 +235,32 @@ def GeometricFeatures(m):
     maxl = 9999
     minl = 0
 
-    x = np.array(x)-cx
-    y = np.array(y)-cy
+    x = np.array(x) - cx
+    y = np.array(y) - cy
     count = 0
     radii = 0
     min_r = 99999
     max_r = 0
     for i in range(0, len(x)):
-        dist = np.linalg.norm(np.array([0, 0])-np.array([x[i], y[i]]))
+        dist = np.linalg.norm(np.array([0, 0]) - np.array([x[i], y[i]]))
         radii += dist
         count += 1
 
-        if(dist < min_r and dist != 0):
+        if dist < min_r and dist != 0:
             min_r = dist
-        if(dist > max_r):
+        if dist > max_r:
             max_r = dist
 
-    avgradius = radii/count
+    avgradius = radii / count
 
-    gd = 2*max_r
-    sd = 2*min_r
+    gd = 2 * max_r
+    sd = 2 * min_r
 
-    irb = p/gd
+    irb = p / gd
 
-    irc = p*(1/sd-1/gd)
+    irc = p * (1 / sd - 1 / gd)
 
-    ird = gd-sd
+    ird = gd - sd
 
     return crc, ira, irb, irc, ird, avgradius, c
 
@@ -354,27 +363,30 @@ def features(bins):
     """
     input bins dict which contains name of bin and posistion of pixel : (x,y)
     """
+    all_features = tuple()
 
     for bin_name, pixels in bins.items():
 
-        Bmean = round(mean([x[0] for x in pixels])[0], ROUND_FACTOR)
-        Gmean = round(mean([x[1] for x in pixels])[0], ROUND_FACTOR)
-        Rmean = round(mean([x[2] for x in pixels])[0], ROUND_FACTOR)
+        Bmean = mean([x[0] for x in pixels])[0]
+        Gmean = mean([x[1] for x in pixels])[0]
+        Rmean = mean([x[2] for x in pixels])[0]
 
         # dont round it as its not directly used
         Bmode = (mode([x[0] for x in pixels])[0])[0]
         Gmode = (mode([x[1] for x in pixels])[0])[0]
         Rmode = (mode([x[2] for x in pixels])[0])[0]
 
-        Bstd = round(std_dev([x[0] for x in pixels])[0], ROUND_FACTOR)
-        Gstd = round(std_dev([x[1] for x in pixels])[0], ROUND_FACTOR)
-        Rstd = round(std_dev([x[2] for x in pixels])[0], ROUND_FACTOR)
+        Bstd = std_dev([x[0] for x in pixels])[0]
+        Gstd = std_dev([x[1] for x in pixels])[0]
+        Rstd = std_dev([x[2] for x in pixels])[0]
 
-        Bsk = round(skewness(Bmean, Bmode, Bstd)[0], ROUND_FACTOR)
-        Gsk = round(skewness(Gmean, Gmode, Gstd)[0], ROUND_FACTOR)
-        Rsk = round(skewness(Rmean, Rmode, Rstd)[0], ROUND_FACTOR)
+        Bsk = skewness(Bmean, Bmode, Bstd)[0]
+        Gsk = skewness(Gmean, Gmode, Gstd)[0]
+        Rsk = skewness(Rmean, Rmode, Rstd)[0]
 
-        return Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk
+        all_features += Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk
+
+    return all_features
 
 
 def TextureFeatures(mask, img):
@@ -420,23 +432,35 @@ def extract(img_name):
 
     mask = mainBlob(np.array(otsu_mask, dtype=np.uint8))
     roi = getROI(img, np.array(mask))
-    io.imsave(f'seg/{img_}', roi)
+    io.imsave(f"seg/{img_}", roi)
 
     crc, ira, irb, irc, ird, avgRadius, c = GeometricFeatures(mask)
     c_bb, c_bg, c_br, c_gg, c_gr, c_rr, adhocb1, adhocg1, adhocr1, adhocb2, adhocg2, adhocr2 = ColorFeatures(
         mask, img, avgRadius, c
     )
-    Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk = TextureFeatures(
-        mask, img)
+    # 8 * 9 => 8 * (Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk) 
+    texture_features = TextureFeatures(mask, img)
+    print([round(x, ROUND_FACTOR) for x in features[0]])
+    
+    with open("features.csv", "a") as f:
+        f.write(
+            f"{img_}"
+            + "".join([f"{x}," for x in texture_features])
+            + f"{crc},{ira},{irb},{irc},{ird},{c_bb},{c_bg},{c_br},{c_gg},{c_gr},{c_rr},{adhocb1},{adhocg1},{adhocr1},{adhocb2},{adhocg2},{adhocr2}\n"
+        )
 
-    with open('features.csv', 'a') as f:
-        f.write(f"{img_},{Bmean},{Gmean},{Rmean},{Bstd},{Gstd},{Rstd},{crc},{ira},{irb},{irc},{ird},{c_bb},{c_bg},{c_br},{c_gg},{c_gr},{c_rr},{adhocb1},{adhocg1},{adhocr1},{adhocb2},{adhocg2},{adhocr2}\n")
 
-
-if __name__ == '__main__':
-    DIR_NAME = 'img'
+if __name__ == "__main__":
+    DIR_NAME = "img"
     num_processors = multiprocessing.cpu_count()
     imgs = os.listdir(DIR_NAME)
+
+    with open("features.csv", "w") as f:
+        f.write(
+            "img_id"
+            + "".join([f"{x}_{i}," for i, x in enumerate(["Bmean", "Gmean", "Rmean", "Bstd", "Gstd", "Rstd", "Bsk", "Gsk", "Rsk"])])
+            + f"{crc},{ira},{irb},{irc},{ird},{c_bb},{c_bg},{c_br},{c_gg},{c_gr},{c_rr},{adhocb1},{adhocg1},{adhocr1},{adhocb2},{adhocg2},{adhocr2}\n"
+        )
 
     with multiprocessing.Pool(processes=num_processors) as pool:
         pool.map(extract, imgs)

@@ -102,6 +102,7 @@ def features(bins):
     """
     input bins dict which contains name of bin and posistion of pixel : (x,y)
     """
+    all_features = tuple()
 
     for bin_name, pixels in bins.items():
 
@@ -122,7 +123,9 @@ def features(bins):
         Gsk = skewness(Gmean, Gmode, Gstd)[0]
         Rsk = skewness(Rmean, Rmode, Rstd)[0]
 
-        return Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk
+        all_features += Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk
+    
+    return all_features
 
 
 def TextureFeatures(mask, img):
