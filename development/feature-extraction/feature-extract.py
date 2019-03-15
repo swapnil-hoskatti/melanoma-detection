@@ -204,11 +204,9 @@ def GeometricFeatures(m):
     p = perimeterpixels
     # CIRCULARITY INDEX
     crc = (4 * areapixels * 3.14) / (perimeterpixels * perimeterpixels)
-    # print(crc)
 
     # IRREGULARITY INDEX A
     ira = p / a
-    # print(ira)
 
     sx = 0
     sy = 0
@@ -440,9 +438,8 @@ def extract(img_name):
     )
     # 8 * 9 => 8 * (Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk) 
     texture_features = TextureFeatures(mask, img)
-    print([round(x, ROUND_FACTOR) for x in features[0]])
     
-    with open("features.csv", "a") as f:
+    with open("features-90.csv", "a") as f:
         f.write(
             f"{img_}"
             + "".join([f"{x}," for x in texture_features])
@@ -455,10 +452,10 @@ if __name__ == "__main__":
     num_processors = multiprocessing.cpu_count()
     imgs = os.listdir(DIR_NAME)
 
-    with open("features.csv", "w") as f:
+    with open("features-90.csv", "w") as f:
         f.write(
             "img_id"
-            + "".join([f"{x}_{i}," for i, x in enumerate(["Bmean", "Gmean", "Rmean", "Bstd", "Gstd", "Rstd", "Bsk", "Gsk", "Rsk"])])
+            + "".join([f"{x}_{i}," for i in range(1,9) for x in ["Bmean", "Gmean", "Rmean", "Bstd", "Gstd", "Rstd", "Bsk", "Gsk", "Rsk"]])
             + f"{crc},{ira},{irb},{irc},{ird},{c_bb},{c_bg},{c_br},{c_gg},{c_gr},{c_rr},{adhocb1},{adhocg1},{adhocr1},{adhocb2},{adhocg2},{adhocr2}\n"
         )
 
