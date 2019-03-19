@@ -38,7 +38,16 @@ def __centerGravity(H_b, H_g, H_r):
 
 
 def texture(img, mask):
-    bins = {}
+    bins = {
+        "0 0 0": None,
+        "0 0 1": None,
+        "0 1 0": None,
+        "1 0 0": None,
+        "1 1 0": None,
+        "0 1 1": None,
+        "1 0 1": None,
+        "1 1 1": None,
+    }
 
     H_b, H_g, H_r = __histogram(img)
     b_median, g_median, r_median = __centerGravity(H_b, H_g, H_r)
@@ -47,30 +56,31 @@ def texture(img, mask):
         for x, pixel in enumerate(rows):
             if any(mask[y][x] != [0, 0, 0]):
                 for index, value in enumerate(pixel):
-                    if index == 0:
-                        # 0 corresponds to B plane in openCV split
-                        if value > b_median:
-                            t_b = 1
-                        else:
-                            t_b = 0
+                    if value is not None:
+                        if index == 0:
+                            # 0 corresponds to B plane in openCV split
+                            if value > b_median:
+                                t_b = 1
+                            else:
+                                t_b = 0
 
-                    if index == 1:
-                        # 1 corresponds to G plane in openCV split
-                        if value > g_median:
-                            t_g = 1
-                        else:
-                            t_g = 0
+                        if index == 1:
+                            # 1 corresponds to G plane in openCV split
+                            if value > g_median:
+                                t_g = 1
+                            else:
+                                t_g = 0
 
-                    if index == 2:
-                        # 2 corresponds to R plane in openCV split
-                        if value > r_median:
-                            t_r = 1
-                        else:
-                            t_r = 0
+                        if index == 2:
+                            # 2 corresponds to R plane in openCV split
+                            if value > r_median:
+                                t_r = 1
+                            else:
+                                t_r = 0
 
                 bin_val = f"{t_b} {t_g} {t_r}"
 
-                if bin_val not in bins.keys():
+                if bins[bin_val] == None:
                     bins[bin_val] = [img[y][x]]
                 else:
                     bins[bin_val] += [img[y][x]]
@@ -105,26 +115,39 @@ def features(bins):
     all_features = tuple()
 
     for bin_name, pixels in bins.items():
+        if pixels:
+            Bmean = mean([x[0] for x in pixels])[0]
+            Gmean = mean([x[1] for x in pixels])[0]
+            Rmean = mean([x[2] for x in pixels])[0]
 
-        Bmean = mean([x[0] for x in pixels])[0]
-        Gmean = mean([x[1] for x in pixels])[0]
-        Rmean = mean([x[2] for x in pixels])[0]
+            # dont round it as its not directly used
+            Bmode = (mode([x[0] for x in pixels])[0])[0]
+            Gmode = (mode([x[1] for x in pixels])[0])[0]
+            Rmode = (mode([x[2] for x in pixels])[0])[0]
 
-        # dont round it as its not directly used
-        Bmode = (mode([x[0] for x in pixels])[0])[0]
-        Gmode = (mode([x[1] for x in pixels])[0])[0]
-        Rmode = (mode([x[2] for x in pixels])[0])[0]
+            Bstd = std_dev([x[0] for x in pixels])[0]
+            Gstd = std_dev([x[1] for x in pixels])[0]
+            Rstd = std_dev([x[2] for x in pixels])[0]
 
-        Bstd = std_dev([x[0] for x in pixels])[0]
-        Gstd = std_dev([x[1] for x in pixels])[0]
-        Rstd = std_dev([x[2] for x in pixels])[0]
+            Bsk = skewness(Bmean, Bmode, Bstd)[0]
+            Gsk = skewness(Gmean, Gmode, Gstd)[0]
+            Rsk = skewness(Rmean, Rmode, Rstd)[0]
+        
+        else:
+            Bmean = np.nan
+            Gmean = np.nan
+            Rmean = np.nan
 
-        Bsk = skewness(Bmean, Bmode, Bstd)[0]
-        Gsk = skewness(Gmean, Gmode, Gstd)[0]
-        Rsk = skewness(Rmean, Rmode, Rstd)[0]
+            Bstd = np.nan
+            Gstd = np.nan
+            Rstd = np.nan
+
+            Bsk = np.nan
+            Gsk = np.nan
+            Rsk = np.nan
 
         all_features += Bmean, Gmean, Rmean, Bstd, Gstd, Rstd, Bsk, Gsk, Rsk
-    
+
     return all_features
 
 

@@ -4,7 +4,6 @@ from keras.callbacks import ModelCheckpoint
 from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D
 from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator
-from keras.optimizers import SGD
 
 
 def save_model(model):
@@ -42,9 +41,9 @@ def vgg_16():
 
     model.add(Flatten())
     model.add(Dense(units=4096, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dropout(rate=0.5))
     model.add(Dense(units=4096, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dropout(rate=0.5))
     model.add(Dense(units=7, activation='softmax'))
 
     return model
@@ -52,24 +51,19 @@ def vgg_16():
 
 if __name__ == '__main__':
     K.clear_session()
-    filepath = 'vgg_16-model-SGD'
+    filepath = 'cnn-model'
 
     model = vgg_16()
-    
-    sgd = SGD()
 
     model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=sgd,
+                  optimizer='adam',
                   metrics=['accuracy'])
 
-    checkpoint_path = filepath + ".{epoch:02d}-{val_acc:.2f}-{loss:.2f}.hdf5"
-
-    checkpoint_val_acc = ModelCheckpoint(
+    checkpoint_path = filepath + ".hdf5"
+    checkpoint = ModelCheckpoint(
         checkpoint_path, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-    checkpoint_loss = ModelCheckpoint(
-        checkpoint_path, monitor='loss', verbose=1, save_best_only=True, mode='max')
-    
-    callbacks_list = [checkpoint_val_acc, checkpoint_loss]
+
+    callbacks_list = [checkpoint]
 
     datagen = ImageDataGenerator(
         rotation_range=40,
@@ -92,41 +86,25 @@ if __name__ == '__main__':
         batch_size=10
     )
 
-    test_data = datagen.flow_from_directory(
-        directory='./all/test/',
-        batch_size=10
-    )
+    # test_data = datagen.flow_from_directory(
+    #     directory='./all/test/',
+    # )
 
     STEP_SIZE_TRAIN = train_data.n//train_data.batch_size
     STEP_SIZE_VALID = validate_data.n//validate_data.batch_size
-    STEP_SIZE_PREDICT = test_data.n//test_data.batch_size
 
-    # K.set_value(model.optimizer.lr, 0.001)
     model.fit_generator(
         generator=train_data,
         validation_data=validate_data,
         steps_per_epoch=STEP_SIZE_TRAIN,
         validation_steps=STEP_SIZE_VALID,
-        epochs=200,
+        epochs=10,
         verbose=True,
-        workers=10,
+        workers=1,
         callbacks=callbacks_list,
-        use_multiprocessing=True,
+        use_multiprocessing=False,
     )
 
-    validation = model.evaluate_generator(
-        generator=validate_data,
-        steps=STEP_SIZE_VALID
-    )
-
-    prediction = model.predict_generator(
-        generator=test_data,
-        steps=STEP_SIZE_PREDICT
-    )
+    model.evaluate_generator(generator=validate_data)
 
     save_model(model)
-
-    print("Evaluation from validation data:\n" + validation)
-    print("Evaluation from predicted data:\n" + prediction)
-
-    

@@ -19,7 +19,7 @@ from . import os, cv2, io, keras, np, morphology
 DNN_CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/deep-classify.json"
 DNN_CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/deep-classify.h5"
 CNN_CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/vgg_16.json"
-CNN_CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/vgg_16-model-val_acc-76-acc-80.hdf5"
+CNN_CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/vgg_16-model-SGD.03-0.80-0.72.hdf5"
 
 # global constants
 ROUND_FACTOR = 4
@@ -103,7 +103,7 @@ def procedure(img):
     # textureFeatures return a tuple of 8 * 9
     texture_features = list(TextureFeatures(mask, img))
     print("Stage 2: Feature Extraction Done")
-
+    print(len(texture_features))
     features = [
         texture_features
             +
@@ -131,15 +131,14 @@ def procedure(img):
 
     # Only for testing:
     print([round(x, ROUND_FACTOR) for x in features[0]])
-    return
-    
+        
     # DNN here
-    loaded_model_json = open(DNN_CLASSIFICATION_MODEL_ARCH_PATH).read()
-    model = keras.models.model_from_json(loaded_model_json)
-    model.load_weights(DNN_CLASSIFICATION_MODEL_WEIGHTS_PATH)
-    model.compile(loss="binary_crossentropy", optimizer="rmsprop", metrics=["accuracy"])
-    score = int(model.predict([features])[0][0])
-    print(f"Stage 3: Prediction Done ~ {score}")
+    # loaded_model_json = open(DNN_CLASSIFICATION_MODEL_ARCH_PATH).read()
+    # model = keras.models.model_from_json(loaded_model_json)
+    # model.load_weights(DNN_CLASSIFICATION_MODEL_WEIGHTS_PATH)
+    # model.compile(loss="binary_crossentropy", optimizer="rmsprop", metrics=["accuracy"])
+    # score = int(model.predict([features])[0][0])
+    # print(f"Stage 3: Prediction Done ~ {score}")
 
     # CNN here
     json_file = open(CNN_CLASSIFICATION_MODEL_ARCH_PATH).read()
