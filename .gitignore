@@ -106,5 +106,6 @@ ENV/
 .git
 
 # custom dirs
+app/static/*.jpg
 temp_files
 core/models/*.hdf5
