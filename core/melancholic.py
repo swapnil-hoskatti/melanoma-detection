@@ -13,19 +13,29 @@ from core.geometricFeature import GeometricFeatures
 from core.clean import remove_hair
 
 # imports - final imports
-from . import os, cv2, io, keras, np, morphology
+from . import os, cv2, io, keras, np, morphology, cnn_dict
 
-# imports - make faster
+# imports - standard imports
 import multiprocessing
+import pickle
+
+# imports - third party randoms 
+import sklearn
+from sklearn.externals import joblib
 
 
 # constants - global constants for classification
 DNN_CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/deep-classify.json"
 DNN_CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/deep-classify.h5"
-CNN_CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/vgg_16.json"
-CNN_CLASSIFICATION_MODEL_WEIGHTS_PATH = (
-    "../core/models/vgg_16-model-SGD.03-0.80-0.72.hdf5"
-)
+
+CNN_CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/vgg_16-resized.json"
+CNN_CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/vgg_16-model-val_acc-82-acc-72.hdf5"
+
+NEW_CNN_CLASSIFICATION_MODEL_ARCH_PATH = "../core/models/vgg_16-og.json"
+NEW_CNN_CLASSIFICATION_MODEL_WEIGHTS_PATH = "../core/models/cnn-model-epoch_01-acc_0.00-valacc_0.90.hdf5"
+
+LOG_CLASSIFICATION_MODEL = "../core/models/logistic_model.pkl"
+NORMALIZER = "../core/models/scaler.pkl"
 
 # global constants
 ROUND_FACTOR = 4
@@ -71,13 +81,13 @@ def procedure(img):
     """
     # pre processing
     hair_rem = remove_hair(img)
-    
+
     # segmentation
     unet_mask = cv2.cvtColor(unetSegment(hair_rem), cv2.COLOR_GRAY2BGR)
     unet_mask = unet_mask.astype(np.uint8)
 
     otsu_mask = otsuThreshold(hair_rem) * 255
-    
+
     temp = [[[0, 0, 0] for x in range(0, 600)] for y in range(0, 450)]
     # combine unet and otsu's mask
     for i in range(450):
@@ -202,19 +212,21 @@ def parallel_procedure(img):
             irb,
             irc,
             ird,
-            c_bb,
-            c_bg,
-            c_br,
-            c_gg,
-            c_br,
+
             c_gr,
+            c_br,
+            c_bg,
+            
             c_rr,
+            c_gg,
+            c_bb,
+            
             adhocb1,
             adhocg1,
             adhocr1,
+            adhocr2,
             adhocb2,
             adhocg2,
-            adhocr2,
         ]
 
     def texture(mask, img):
@@ -250,38 +262,51 @@ def parallel_procedure(img):
     process_bins.join()
     process_col_geo.join()
 
-    print("Stage 2: Feature Extraction Done")
     while True:
         if len(features_dict) is 2:
-            features = [
+            print("Stage 2: Feature Extraction Done")
+            features = np.array([[
                 round(x, ROUND_FACTOR)
                 for x in features_dict["geo_color"] + features_dict["texture"]
-            ]
+            ]])
             break
+    
+    # Convert NaN to 0
+    loc_vector = np.isnan(features)
+    features[loc_vector] = 0
 
-    # normalized feature set
-    features_norm = features
+    # Normalizer
+    scaler = joblib.load(NORMALIZER)
+    
+    try:
+        features_norm = scaler.transform(features)
+    except:
+        features_norm = features
 
     # Logistic Regressor
-    pred_logistic = 1
+    model_lr = joblib.load(LOG_CLASSIFICATION_MODEL)
+    pred_logistic = model_lr.predict(features_norm)
+    print(f"Stage 3.1: LR Prediction Done ~ {pred_logistic}")
 
     # CNN: VGG-16
-    json_file = open(CNN_CLASSIFICATION_MODEL_ARCH_PATH).read()
+    json_file = open(NEW_CNN_CLASSIFICATION_MODEL_ARCH_PATH).read()
     model_cnn = keras.models.model_from_json(json_file)
-    model_cnn.load_weights(CNN_CLASSIFICATION_MODEL_WEIGHTS_PATH)
+    model_cnn.load_weights(NEW_CNN_CLASSIFICATION_MODEL_WEIGHTS_PATH)
     model_cnn.compile(
         loss="binary_crossentropy", optimizer="rmsprop", metrics=["accuracy"]
     )
-    pred_cnn = int(
-        model_cnn.predict_classes(
-            [
-                cv2.resize(
-                    roi, dsize=(256, 256), interpolation=cv2.INTER_CUBIC
-                ).reshape((1, 256, 256, 3))
-            ]
+    pred_cnn = cnn_dict[
+        int(
+            model_cnn.predict_classes(
+                [
+                    cv2.resize(
+                        roi, dsize=(450, 600), interpolation=cv2.INTER_CUBIC
+                    ).reshape((1, 450, 600, 3))
+                ]
+            )
         )
-    )
-    print(f"Stage 3: CNN Prediction Done ~ {pred_cnn}")
+    ]
+    print(f"Stage 3.2: CNN Prediction Done ~ {pred_cnn}")
     print("---" * 10)
 
     io.imsave("static/hair_rem.jpg", hair_rem)
@@ -291,12 +316,11 @@ def parallel_procedure(img):
     io.imsave("static/final_mask.jpg", np.array(mask, dtype=np.uint8) * 255)
     io.imsave("static/roi.jpg", roi)
 
-    return (
-        features,
-        features_norm,
-        pred_logistic,
-        pred_cnn,
-    )
+    # remove data from dicts after each run
+    features_dict.clear()
+    masks.clear()
+
+    return (features, features_norm, pred_logistic, pred_cnn)
 
 
 def main_app(path):
@@ -305,5 +329,5 @@ def main_app(path):
     params: str (path)
     """
     img = read(path)
-    io.imsave("static/img.jpg", cv2.cvtColor(img, cv2.COLOR_BGR2RGB))   
+    io.imsave("static/img.jpg", cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     return parallel_procedure(img)

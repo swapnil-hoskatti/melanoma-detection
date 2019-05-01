@@ -17,3 +17,9 @@ from scipy import ndimage, stats
 from skimage import data, feature, filters, io, morphology
 from skimage.filters import threshold_adaptive, threshold_otsu
 from sklearn.cluster import KMeans
+
+# global cnn table : extracted from Keras settings
+cnn_dict = {
+    1 : 'Melanoma',
+    0 : 'Nevus'
+}

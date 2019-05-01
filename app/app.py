@@ -20,20 +20,19 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 UPLOAD_FOLDER = "../temp_files/"
 ALLOWED_EXTENSIONS = set(
     [
+        "bmp",
+        "dib",
+        "jpeg",
         "jpg",
+        "jpe",
         "jpeg",
         "jp2",
-        "jpe",
-        "sr",
-        "ras",
+        "png",
         "pbm",
         "pgm",
         "ppm",
-        "png",
-        "gif",
-        "tif",
         "tiff",
-        "bmp",
+        "tif",
     ]
 )
 

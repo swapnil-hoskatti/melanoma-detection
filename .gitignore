@@ -101,6 +101,8 @@ ENV/
 
 # others
 *.pickle
+*.pkl
+*.crdownload
 .directory
 .vscode
 .git
