@@ -14,7 +14,7 @@ from core.melancholic import main_app as melancholic
 
 # ignoring warnings and TF logs
 warnings.filterwarnings("ignore")
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 # setting up constants
 UPLOAD_FOLDER = "../temp_files/"
@@ -77,10 +77,17 @@ def upload_file():
             file.save(current_file_path)
 
             # send to base-app here
-            prediction = melancholic(current_file_path)
+            features, features_norm, pred_logistic, pred_cnn = melancholic(
+                current_file_path
+            )
 
-            # prediction = 'true'
-
-            return render("page.html", result=prediction, upload="true")
+            return render(
+                "page.html",
+                features=features,
+                features_norm=features_norm,
+                pred_logistic=pred_logistic,
+                pred_cnn=pred_cnn,
+                upload="true",
+            )
 
     return render("page.html", upload="false")

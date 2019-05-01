@@ -28,11 +28,18 @@
                     <input type=submit value=Upload>
                 </form>
             {% else %}
-                {% if result == 1 %}
-                    <h1 class="display-4">Nevus</h1>
-                {% else %}
-                    <h1 class="display-4">Melanoma</h1>
-                {% endif %}
+                <img src="{{url_for('static', filename='img.jpg')}}" />
+                <img src="{{url_for('static', filename='hair_rem.jpg')}}" />
+                <img src="{{url_for('static', filename='unet_mask.jpg')}}" />
+                <img src="{{url_for('static', filename='otsu_mask.jpg')}}" />
+                <img src="{{url_for('static', filename='combined_mask.jpg')}}" />
+                <img src="{{url_for('static', filename='final_mask.jpg')}}" />
+                <img src="{{url_for('static', filename='roi.jpg')}}" />
+                <h4 class="display-1">{{features}}</h1>
+                <h4 class="display-1">{{features_norm}}</h1>
+
+                <h3>Class Predicted by Manual Feature Extraction + Logistic: {{pred_logistic}}</h3>
+                <h3>Class Predicted by CNN: {{pred_cnn}}</h3>
             {% endif%}
         </div>
     </div>
