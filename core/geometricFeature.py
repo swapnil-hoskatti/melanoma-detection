@@ -8,7 +8,10 @@ from . import feature, np
 
 
 def GeometricFeatures(mask):
-    edges1 = feature.canny(mask, sigma=0)
+    try:
+        edges1 = feature.canny(mask, sigma=0)
+    except:
+        return (np.nan,) * 7
 
     perimeterpixels = 0
     areapixels = 0

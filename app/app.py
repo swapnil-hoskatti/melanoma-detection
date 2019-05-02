@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 
 # imports - module imports
 from core.melancholic import main_app as melancholic
+from . import format_tuple
 
 # ignoring warnings and TF logs
 warnings.filterwarnings("ignore")
@@ -76,9 +77,11 @@ def upload_file():
             file.save(current_file_path)
 
             # send to base-app here
-            features, features_norm, pred_logistic, pred_cnn = melancholic(
+            output_tuple = melancholic(
                 current_file_path
             )
+
+            features, features_norm, pred_logistic, pred_cnn = format_tuple(output_tuple)
 
             return render(
                 "page.html",

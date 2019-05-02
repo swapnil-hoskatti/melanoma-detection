@@ -10,6 +10,11 @@
         <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
         <style>
             .container { padding-top: 70px; }
+            img { 
+                width: 50%; 
+                height: 50%; 
+                object-fit: contain; 
+            } 
         </style>
     </head>
 
@@ -28,18 +33,32 @@
                     <input type=submit value=Upload>
                 </form>
             {% else %}
-                <img src="{{url_for('static', filename='img.jpg')}}" />
-                <img src="{{url_for('static', filename='hair_rem.jpg')}}" />
-                <img src="{{url_for('static', filename='unet_mask.jpg')}}" />
-                <img src="{{url_for('static', filename='otsu_mask.jpg')}}" />
-                <img src="{{url_for('static', filename='combined_mask.jpg')}}" />
-                <img src="{{url_for('static', filename='final_mask.jpg')}}" />
-                <img src="{{url_for('static', filename='roi.jpg')}}" />
-                <h4 class="display-1">{{features}}</h1>
-                <h4 class="display-1">{{features_norm}}</h1>
+                <img src="{{url_for('static', filename='img.jpg')}}" /><br>
+                <b>Input Image</b><br>
+                
+                <img src="{{url_for('static', filename='hair_rem.jpg')}}" /><br>
+                <b>Prepocessing: Hair Removal</b><br>
+                
+                <img src="{{url_for('static', filename='unet_mask.jpg')}}" /><br>
+                <b>Unet Mask</b><br>
+                
+                <img src="{{url_for('static', filename='otsu_mask.jpg')}}" /><br>
+                <b>Otsu Mask</b><br>
+                
+                <img src="{{url_for('static', filename='combined_mask.jpg')}}" /><br>
+                <b>Combined Mask</b><br>
+                
+                <img src="{{url_for('static', filename='final_mask.jpg')}}" /><br>
+                <b>Final Mask</b><br>
+                
+                <img src="{{url_for('static', filename='roi.jpg')}}" /><br>
+                <b>ROI Mask</b><br>
 
-                <h3>Class Predicted by Manual Feature Extraction + Logistic: {{pred_logistic}}</h3>
-                <h3>Class Predicted by CNN: {{pred_cnn}}</h3>
+                <b>Feature Set: {{features}}</b><br>
+                <!--b {{features_norm}}</b><br>-->
+
+                <h3>Class Predicted by Manual Feature Extraction + Logistic: {{pred_logistic}}</h3><br>
+                <h3>Class Predicted by CNN: {{pred_cnn}}</h3><br>
             {% endif%}
         </div>
     </div>

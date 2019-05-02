@@ -250,16 +250,30 @@ def parallel_procedure(img):
             break
 
     mask = mainBlob(final_mask)
+
+    # error: divide by zero
+    from core.geometricFeature import GeometricFeatures
+    
+    try:
+        crc, ira, irb, irc, ird, avgradius, c = GeometricFeatures(mask)
+    except ZeroDivisionError:
+        mask = final_mask
+        try:
+            crc, ira, irb, irc, ird, avgradius, c = GeometricFeatures(mask)
+        except ZeroDivisionError:
+            mask = masks["otsu"]
+
     # roi for visualization + CNN
     roi = getROI(img, np.array(mask))
     print("Stage 1: Segmentation Done")
 
     # feature extraction
     process_bins = multiprocessing.Process(target=texture, args=(mask, img))
-    process_col_geo = multiprocessing.Process(target=geo_color, args=(mask, img))
     process_bins.start()
-    process_col_geo.start()
     process_bins.join()
+    
+    process_col_geo = multiprocessing.Process(target=geo_color, args=(mask, img))
+    process_col_geo.start()
     process_col_geo.join()
 
     while True:
@@ -280,12 +294,13 @@ def parallel_procedure(img):
     
     try:
         features_norm = scaler.transform(features)
-    except:
+    except Exception as e:
+        print(e)
         features_norm = features
 
     # Logistic Regressor
     model_lr = joblib.load(LOG_CLASSIFICATION_MODEL)
-    pred_logistic = model_lr.predict(features_norm)
+    pred_logistic = model_lr.predict(features_norm)[0]
     print(f"Stage 3.1: LR Prediction Done ~ {pred_logistic}")
 
     # CNN: VGG-16
@@ -313,7 +328,7 @@ def parallel_procedure(img):
     io.imsave("static/unet_mask.jpg", np.array(masks["unet"], dtype=np.uint8) * 255)
     io.imsave("static/otsu_mask.jpg", masks["otsu"])
     io.imsave("static/combined_mask.jpg", np.array(final_mask, dtype=np.uint8))
-    io.imsave("static/final_mask.jpg", np.array(mask, dtype=np.uint8) * 255)
+    cv2.imwrite("static/final_mask.jpg", np.array(mask, dtype=np.uint8).astype(np.uint8) * 255)
     io.imsave("static/roi.jpg", roi)
 
     # remove data from dicts after each run

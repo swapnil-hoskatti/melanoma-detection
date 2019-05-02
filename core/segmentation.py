@@ -58,9 +58,12 @@ def getROI(img, mask):
 
     for i in range(len(img)):
         for j in range(len(img[0])):
-            if mask[i][j] == 0:
-                img[i][j] = (0, 0, 0)
-
+            try:
+                if mask[i][j] == 0:
+                    img[i][j] = (0, 0, 0)
+            except ValueError:
+                if any(mask[i][j]) == 0:
+                    img[i][j] = (0, 0, 0)
     return cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
 
 

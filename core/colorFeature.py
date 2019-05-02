@@ -11,11 +11,18 @@ def covariance(mask, img):
     b, g, r, m, count, icount = [], [], [], [], 0, 0
     for i, t in enumerate(mask):
         for j, s in enumerate(t):
-            if s == True:
-                m.append(img[i][j])
-                b.append(img[i][j][0])
-                g.append(img[i][j][1])
-                r.append(img[i][j][2])
+            try:
+                if s == True:
+                    m.append(img[i][j])
+                    b.append(img[i][j][0])
+                    g.append(img[i][j][1])
+                    r.append(img[i][j][2])
+            except ValueError:
+                if any(s) == True:
+                    m.append(img[i][j])
+                    b.append(img[i][j][0])
+                    g.append(img[i][j][1])
+                    r.append(img[i][j][2])                
     bg, br, gr = np.cov(b, g), np.cov(b, r), np.cov(g, r)
     
     #   B-B, B-G, B-R, G-G, G-R, R-R
@@ -27,8 +34,13 @@ def adhoc(m, image, avgradius, ratio, c):
     ac = 0
     ab = 0
     border = [0, 0, 0]
-    cx = c[0]
-    cy = c[1]
+    
+    try:
+        cx = c[0]
+        cy = c[1]
+    except:
+        return np.nan, np.nan, np.nan
+
     for i in range(0, 450):
         for j in range(0, 600):
             a = avgradius*ratio
