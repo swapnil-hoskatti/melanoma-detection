@@ -22,7 +22,7 @@ Y_ = np.array(df['class'])
 Y = to_categorical(Y_)
 
 X_train, X_test, Y_train, Y_test = train_test_split(
-    X, Y, test_size=0.2, random_state=62)
+	X, Y, test_size=0.2, random_state=62)
 
 # dnn model
 model = Sequential()
@@ -39,20 +39,20 @@ model.add(Dense(1500, activation='relu'))
 model.add(Dense(500, activation='relu'))
 model.add(Dense(7, activation='softmax'))
 model.compile(loss='binary_crossentropy',
-              optimizer='adam', metrics=['accuracy'])
+			  optimizer='adam', metrics=['accuracy'])
 
 
 checkpoint_path = filepath + "-{epoch:02d}-{val_acc:.2f}.hdf5"
 checkpoint = ModelCheckpoint(
-    filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+	filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
 callbacks_list = [checkpoint]
 
 model.fit(X_train, Y_train,  validation_split=0.33, epochs=10,
-          batch_size=100, callbacks=callbacks_list, verbose=True)
+		  batch_size=100, callbacks=callbacks_list, verbose=True)
 
 scores = model.evaluate(X_test, Y_test)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
 model_json = model.to_json()
 with open(filepath + ".json", "w") as json_file:
-    json_file.write(model_json)
+	json_file.write(model_json)

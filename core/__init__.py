@@ -20,6 +20,6 @@ from sklearn.cluster import KMeans
 
 # global cnn table : extracted from Keras settings
 cnn_dict = {
-    1 : 'Melanoma',
-    0 : 'Nevus'
+	1 : 'Melanoma',
+	0 : 'Nevus'
 }

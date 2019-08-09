@@ -1,78 +1,78 @@
 <!doctype html>
 <html>
-    <head>
-        <meta charset="utf-8"/>
-        <title>{% block title %} {{ title }} {% endblock %}</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
-        <link rel="icon" href="{{ url_for('static', filename='site_icon.png') }}" class="js-favicon">
-        <!--div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div-->
-        <script src="{{ url_for('static', filename='jquery-3.3.1.slim.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
-        <style>
-            .container { padding-top: 70px; }
-            img { 
-                width: 50%; 
-                height: 50%; 
-                object-fit: contain; 
-            } 
-        </style>
-    </head>
+	<head>
+		<meta charset="utf-8"/>
+		<title>{% block title %} {{ title }} {% endblock %}</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+		<link rel="icon" href="{{ url_for('static', filename='site_icon.png') }}" class="js-favicon">
+		<!--div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div-->
+		<script src="{{ url_for('static', filename='jquery-3.3.1.slim.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+		<style>
+			.container { padding-top: 70px; }
+			img {
+				width: 50%;
+				height: 50%;
+				object-fit: contain;
+			}
+		</style>
+	</head>
 
-    <nav class="navbar navbar-dark bg-dark">
-        <button id="reload-button" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            This Button Reloads the page
-        </button>
-    </nav>
+	<nav class="navbar navbar-dark bg-dark">
+		<button id="reload-button" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			This Button Reloads the page
+		</button>
+	</nav>
 
-    <div class="jumbotron jumbotron-fluid">
-        <div class="container">
-            {% if upload == 'false' %}
-            <h1 class="display-4">Upload new File</h1>
-                <form method=post enctype=multipart/form-data>
-                    <input type=file name=file>
-                    <input type=submit value=Upload>
-                </form>
-            {% else %}
-                <img src="{{url_for('static', filename='img.jpg')}}" /><br>
-                <b>Input Image</b><br>
-                
-                <img src="{{url_for('static', filename='hair_rem.jpg')}}" /><br>
-                <b>Prepocessing: Hair Removal</b><br>
-                
-                <img src="{{url_for('static', filename='unet_mask.jpg')}}" /><br>
-                <b>Unet Mask</b><br>
-                
-                <img src="{{url_for('static', filename='otsu_mask.jpg')}}" /><br>
-                <b>Otsu Mask</b><br>
-                
-                <img src="{{url_for('static', filename='combined_mask.jpg')}}" /><br>
-                <b>Combined Mask</b><br>
-                
-                <img src="{{url_for('static', filename='final_mask.jpg')}}" /><br>
-                <b>Final Mask</b><br>
-                
-                <img src="{{url_for('static', filename='roi.jpg')}}" /><br>
-                <b>ROI Mask</b><br>
+	<div class="jumbotron jumbotron-fluid">
+		<div class="container">
+			{% if upload == 'false' %}
+			<h1 class="display-4">Upload new File</h1>
+				<form method=post enctype=multipart/form-data>
+					<input type=file name=file>
+					<input type=submit value=Upload>
+				</form>
+			{% else %}
+				<img src="{{url_for('static', filename='img.jpg')}}" /><br>
+				<b>Input Image</b><br>
 
-                <b>Feature Set: {{features}}</b><br>
-                <!--b {{features_norm}}</b><br>-->
+				<img src="{{url_for('static', filename='hair_rem.jpg')}}" /><br>
+				<b>Prepocessing: Hair Removal</b><br>
 
-                <h3>Class Predicted by Manual Feature Extraction + Logistic: {{pred_logistic}}</h3><br>
-                <h3>Class Predicted by CNN: {{pred_cnn}}</h3><br>
-            {% endif%}
-        </div>
-    </div>
+				<img src="{{url_for('static', filename='unet_mask.jpg')}}" /><br>
+				<b>Unet Mask</b><br>
 
-    <script>
-        let reload = document.getElementById('reload-button');
-        {% if upload == 'true' %}
-            reload.onclick = function(){
-                window.location = "http://localhost:5000/";
-            }
-        {% else %}
-            reload.onclick = function refreshPage(){
-                window.location.reload();
-            } 
-        {% endif %}
-    </script>
+				<img src="{{url_for('static', filename='otsu_mask.jpg')}}" /><br>
+				<b>Otsu Mask</b><br>
+
+				<img src="{{url_for('static', filename='combined_mask.jpg')}}" /><br>
+				<b>Combined Mask</b><br>
+
+				<img src="{{url_for('static', filename='final_mask.jpg')}}" /><br>
+				<b>Final Mask</b><br>
+
+				<img src="{{url_for('static', filename='roi.jpg')}}" /><br>
+				<b>ROI Mask</b><br>
+
+				<b>Feature Set: {{features}}</b><br>
+				<!--b {{features_norm}}</b><br>-->
+
+				<h3>Class Predicted by Manual Feature Extraction + Logistic: {{pred_logistic}}</h3><br>
+				<h3>Class Predicted by CNN: {{pred_cnn}}</h3><br>
+			{% endif%}
+		</div>
+	</div>
+
+	<script>
+		let reload = document.getElementById('reload-button');
+		{% if upload == 'true' %}
+			reload.onclick = function(){
+				window.location = "http://localhost:5000/";
+			}
+		{% else %}
+			reload.onclick = function refreshPage(){
+				window.location.reload();
+			}
+		{% endif %}
+	</script>
 </html>
